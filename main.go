@@ -89,7 +89,7 @@ func addRecordDefinition(schema []byte, pkg *generator.Package, generateContaine
 	if enhanceWithSSCStuff {
 		// GenerateID
 		type schemaUUIDKeys struct {
-			UUIDKeys []string `json:"uuidKeys"`
+			UUIDKeys []string `json:"uuid_keys"`
 		}
 
 		var schemaObj schemaUUIDKeys
@@ -103,7 +103,7 @@ func addRecordDefinition(schema []byte, pkg *generator.Package, generateContaine
 
 		// Metric
 		type schemaMetricTags struct {
-			MetricTags []string `json:"metricTags"`
+			MetricTags []string `json:"metric_tags"`
 		}
 
 		var smt schemaMetricTags
