@@ -234,3 +234,50 @@ func (a *AvroContainerWriter) AddAvroContainerWriter(p *generator.Package) {
 	p.AddFunction(a.filename(), a.name(), "WriteRecord", a.writeRecordDef())
 	p.AddFunction(a.filename(), a.name(), "Flush", a.flushDef())
 }
+
+func (a *AvroContainerWriter) AddCheckSchema(p *generator.Package) {
+	// Import guard, to avoid circular dependencies
+	if !p.HasFunction(a.filename(), "", "CheckSchema") {
+		p.AddImport(a.filename(), "encoding/json")
+		p.AddImport(a.filename(), "reflect")
+		p.AddImport(a.filename(), "github.com/securityscorecard/go-schema-registry-client")
+
+		fnDef := fmt.Sprintf(`
+			func (avroWriter *%s) CheckSchema(c schemaregistry.Client) error {
+				type Schema struct {
+					Subject string `+"`json:\"subject\"`"+`
+					Version int `+"`json:\"version\"`"+`
+				}
+
+				// Get the generated schema info
+				var gsch Schema
+				if err := json.Unmarshal([]byte(%sSchema), &gsch); err != nil {
+					return fmt.Errorf("failed to unmarshal generated schema: %%s", err)
+				}
+
+				// Retrieve the schema from the registry
+				ssch, err := c.GetSchemaBySubject(gsch.Subject, gsch.Version)
+				if err != nil {
+					return fmt.Errorf("failed to retrieve schema from registry: %%s", err)
+				}
+
+				// Compare the two schemas
+				var a, b map[string]interface{}
+				if err := json.Unmarshal([]byte(%sSchema), &a); err != nil {
+					return fmt.Errorf("failed to unmarshal generated schema: %%s", err)
+				}
+				if err := json.Unmarshal([]byte(ssch.Schema), &b); err != nil {
+					return fmt.Errorf("failed to unmarshal schema from registry: %%s", err)
+				}
+
+				if !reflect.DeepEqual(a, b) {
+					return fmt.Errorf("warning: incompatible schemas")
+				}
+
+				return nil
+			}
+		`, a.name(), a.record.GoType(), a.record.GoType())
+
+		p.AddFunction(a.filename(), a.name(), "CheckSchema", fnDef)
+	}
+}

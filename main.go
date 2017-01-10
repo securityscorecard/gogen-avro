@@ -79,6 +79,11 @@ func addRecordDefinition(schema []byte, pkg *generator.Package, generateContaine
 	if generateContainer {
 		containerWriter := container.NewAvroContainerWriter(schema, recordDefinition)
 		containerWriter.AddAvroContainerWriter(pkg)
+
+		if enhanceWithSSCStuff {
+			// CheckSchema
+			containerWriter.AddCheckSchema(pkg)
+		}
 	}
 
 	if enhanceWithSSCStuff {
