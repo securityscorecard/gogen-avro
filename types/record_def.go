@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/alanctgardner/gogen-avro/generator"
 	"github.com/serenize/snaker"
@@ -182,4 +183,30 @@ func (r *RecordDefinition) uuidStrDef(uuidKeys []string) string {
 	}
 
 	return strDef
+}
+
+func (r *RecordDefinition) AddMetric(p *generator.Package, metricTags []string) {
+	// Import guard, to avoid circular dependencies
+	if !p.HasFunction(r.filename(), "", "Metric") {
+		p.AddImport(r.filename(), "github.com/securityscorecard/go-stats")
+
+		// Create function definition
+		fnDef := fmt.Sprintf(`
+			func (r %v) Metric(statser stats.Statser) {
+				statser.Count("%s", 1, stats.Tags{
+					%s
+				})
+			}
+		`, r.GoType(), r.name, r.metricTagsDef(metricTags))
+
+		p.AddFunction(r.filename(), r.GoType(), "Metric", fnDef)
+	}
+}
+
+func (r *RecordDefinition) metricTagsDef(metricTags []string) string {
+	strDefParts := []string{}
+	for _, tag := range metricTags {
+		strDefParts = append(strDefParts, fmt.Sprintf(`"%s": r.%s,`, tag, snaker.SnakeToCamel(tag)))
+	}
+	return strings.Join(strDefParts, "\n")
 }

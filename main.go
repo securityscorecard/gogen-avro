@@ -95,6 +95,20 @@ func addRecordDefinition(schema []byte, pkg *generator.Package, generateContaine
 		if len(schemaObj.UUIDKeys) > 0 {
 			recordDefinition.AddGenerateID(pkg, schemaObj.UUIDKeys)
 		}
+
+		// Metric
+		type schemaMetricTags struct {
+			MetricTags []string `json:"metricTags"`
+		}
+
+		var smt schemaMetricTags
+		if err := json.Unmarshal(schema, &smt); err != nil {
+			return err
+		}
+
+		if len(smt.MetricTags) > 0 {
+			recordDefinition.AddMetric(pkg, smt.MetricTags)
+		}
 	}
 
 	return nil
