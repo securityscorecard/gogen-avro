@@ -206,7 +206,10 @@ func (r *RecordDefinition) AddMetric(p *generator.Package, metricTags []string) 
 func (r *RecordDefinition) metricTagsDef(metricTags []string) string {
 	strDefParts := []string{}
 	for _, tag := range metricTags {
-		strDefParts = append(strDefParts, fmt.Sprintf(`"%s": r.%s,`, tag, snaker.SnakeToCamel(tag)))
+		part := fmt.Sprintf(`
+			"%s": fmt.Sprint(r.%s),
+		`, tag, snaker.SnakeToCamel(tag))
+		strDefParts = append(strDefParts, part)
 	}
 	return strings.Join(strDefParts, "\n")
 }

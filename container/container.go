@@ -240,6 +240,7 @@ func (a *AvroContainerWriter) AddCheckSchema(p *generator.Package) {
 	if !p.HasFunction(a.filename(), "", "CheckSchema") {
 		p.AddImport(a.filename(), "encoding/json")
 		p.AddImport(a.filename(), "reflect")
+		p.AddImport(a.filename(), "fmt")
 		p.AddImport(a.filename(), "github.com/securityscorecard/go-schema-registry-client")
 
 		fnDef := fmt.Sprintf(`
