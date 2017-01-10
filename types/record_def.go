@@ -2,7 +2,9 @@ package types
 
 import (
 	"fmt"
+
 	"github.com/alanctgardner/gogen-avro/generator"
+	"github.com/serenize/snaker"
 )
 
 const recordStructDefTemplate = `type %v struct {
@@ -132,4 +134,52 @@ func (r *RecordDefinition) AddDeserializer(p *generator.Package) {
 			f.AddDeserializer(p)
 		}
 	}
+}
+
+// AddGenerateID adds a GenerateID method which creates a uuidV5 from a set of fields
+func (r *RecordDefinition) AddGenerateID(p *generator.Package, uuidKeys []string) {
+	// Import guard, to avoid circular dependencies
+	if !p.HasFunction(r.filename(), "", "GenerateID") {
+		p.AddImport(r.filename(), "fmt")
+		p.AddImport(r.filename(), "github.com/satori/go.uuid")
+
+		// Create function definition
+		fnDef := fmt.Sprintf(`
+			func (r %v) GenerateID() string {
+				s := fmt.Sprintf(%s)
+				return uuid.NewV5(uuid.NamespaceOID, s).String()
+			}
+		`, r.GoType(), r.uuidStrDef(uuidKeys))
+
+		p.AddFunction(r.filename(), r.GoType(), "GenerateID", fnDef)
+	}
+}
+
+// uuidStrDef generates the fmt.Sprintf compatible input for the AddGenerateID method
+// e.g. for uuidKeys = []string{"A", "B"} => `"%v%v", A, B`
+func (r *RecordDefinition) uuidStrDef(uuidKeys []string) string {
+	// Create CamelCase uuidKeysSet
+	uuidKeysSet := make(map[string]bool)
+	for _, uuidKey := range uuidKeys {
+		uuidKeysSet[snaker.SnakeToCamel(uuidKey)] = true
+	}
+
+	fieldsToInclude := []string{}
+	for _, f := range r.fields {
+		fName := snaker.SnakeToCamel(f.Name())
+		if _, ok := uuidKeysSet[fName]; ok {
+			fieldsToInclude = append(fieldsToInclude, fName)
+		}
+	}
+
+	strDef := `"`
+	for i := 0; i < len(fieldsToInclude); i++ {
+		strDef += "%v"
+	}
+	strDef += `"`
+	for _, fName := range fieldsToInclude {
+		strDef += fmt.Sprintf(", r.%s", fName)
+	}
+
+	return strDef
 }
