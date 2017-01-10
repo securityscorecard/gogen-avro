@@ -1,7 +1,10 @@
 package container
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+
 	"github.com/alanctgardner/gogen-avro/generator"
 	"github.com/alanctgardner/gogen-avro/types"
 )
@@ -21,7 +24,7 @@ const (
 const closeableResettableWriterDef = `
 type CloseableResettableWriter interface {
 	Close() error
-	Reset(io.Writer) 
+	Reset(io.Writer)
 }
 `
 
@@ -31,10 +34,10 @@ type %v struct {
 	syncMarker [16]byte
 	codec Codec
 	recordsPerBlock int64
-	
+
 	blockBuffer *bytes.Buffer
 	compressedWriter io.Writer
-	nextBlockRecords int64	
+	nextBlockRecords int64
 }
 `
 
@@ -104,7 +107,7 @@ func %v(writer io.Writer, codec Codec, recordsPerBlock int64) (*%v, error) {
 		recordsPerBlock: recordsPerBlock,
 		blockBuffer: blockBuffer,
 	}
-	
+
 	if codec == Deflate {
 		avroWriter.compressedWriter, err = flate.NewWriter(avroWriter.blockBuffer, flate.DefaultCompression)
 		if err != nil {
@@ -115,7 +118,7 @@ func %v(writer io.Writer, codec Codec, recordsPerBlock int64) (*%v, error) {
 	} else if codec == Null {
 		avroWriter.compressedWriter = avroWriter.blockBuffer
 	}
-	
+
 	return avroWriter, nil
 }
 `
@@ -130,7 +133,7 @@ func (avroWriter *%v) WriteRecord(record %v) error {
 	avroWriter.nextBlockRecords += 1
 
 	// If the block if full, flush and reset the compressed writer,
-	// write the header and the block contents 
+	// write the header and the block contents
 	if avroWriter.nextBlockRecords >= avroWriter.recordsPerBlock {
 		return avroWriter.Flush()
 	}
@@ -147,7 +150,7 @@ func (avroWriter *%v) Flush() error {
 		fwWriter.Close()
 		fwWriter.Reset(avroWriter.blockBuffer)
 	}
-	
+
 	block := &AvroContainerBlock {
 		NumRecords: avroWriter.nextBlockRecords,
 		RecordBytes: avroWriter.blockBuffer.Bytes(),
@@ -157,9 +160,9 @@ func (avroWriter *%v) Flush() error {
 	if err != nil {
 		return err
 	}
-	
+
 	avroWriter.blockBuffer.Reset()
-	avroWriter.nextBlockRecords = 0	
+	avroWriter.nextBlockRecords = 0
 
 	return nil
 }
@@ -171,8 +174,12 @@ type AvroContainerWriter struct {
 }
 
 func NewAvroContainerWriter(schema []byte, record *types.RecordDefinition) *AvroContainerWriter {
+	// compact the schema
+	buf := &bytes.Buffer{}
+	json.Compact(buf, schema)
+
 	return &AvroContainerWriter{
-		schema: schema,
+		schema: buf.Bytes(),
 		record: record,
 	}
 }
