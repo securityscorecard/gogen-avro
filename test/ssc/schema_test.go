@@ -1,7 +1,6 @@
 package avro
 
 import (
-	"bytes"
 	"reflect"
 	"testing"
 	"time"
@@ -82,13 +81,7 @@ func TestCheckSchema(t *testing.T) {
 		},
 	}
 
-	buf := &bytes.Buffer{}
-	w, err := NewTestRecordContainerWriter(buf, Snappy, 10)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := w.CheckSchema(c); err != nil {
+	if err := CheckSchema(c); err != nil {
 		t.Fatalf("failed to check the schema successfully: %s", err)
 	}
 }

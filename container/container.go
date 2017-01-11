@@ -244,7 +244,7 @@ func (a *AvroContainerWriter) AddCheckSchema(p *generator.Package) {
 		p.AddImport(a.filename(), "github.com/securityscorecard/go-schema-registry-client")
 
 		fnDef := fmt.Sprintf(`
-			func (avroWriter *%s) CheckSchema(c schemaregistry.Client) error {
+			func CheckSchema(c schemaregistry.Client) error {
 				type Schema struct {
 					Subject string `+"`json:\"subject\"`"+`
 					Version int `+"`json:\"version\"`"+`
@@ -277,7 +277,7 @@ func (a *AvroContainerWriter) AddCheckSchema(p *generator.Package) {
 
 				return nil
 			}
-		`, a.name(), a.record.GoType(), a.record.GoType())
+		`, a.record.GoType(), a.record.GoType())
 
 		p.AddFunction(a.filename(), a.name(), "CheckSchema", fnDef)
 	}
