@@ -1,7 +1,10 @@
 package container
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+
 	"github.com/alanctgardner/gogen-avro/generator"
 	"github.com/alanctgardner/gogen-avro/types"
 )
@@ -21,7 +24,7 @@ const (
 const closeableResettableWriterDef = `
 type CloseableResettableWriter interface {
 	Close() error
-	Reset(io.Writer) 
+	Reset(io.Writer)
 }
 `
 
@@ -31,10 +34,10 @@ type %v struct {
 	syncMarker [16]byte
 	codec Codec
 	recordsPerBlock int64
-	
+
 	blockBuffer *bytes.Buffer
 	compressedWriter io.Writer
-	nextBlockRecords int64	
+	nextBlockRecords int64
 }
 `
 
@@ -104,7 +107,7 @@ func %v(writer io.Writer, codec Codec, recordsPerBlock int64) (*%v, error) {
 		recordsPerBlock: recordsPerBlock,
 		blockBuffer: blockBuffer,
 	}
-	
+
 	if codec == Deflate {
 		avroWriter.compressedWriter, err = flate.NewWriter(avroWriter.blockBuffer, flate.DefaultCompression)
 		if err != nil {
@@ -115,7 +118,7 @@ func %v(writer io.Writer, codec Codec, recordsPerBlock int64) (*%v, error) {
 	} else if codec == Null {
 		avroWriter.compressedWriter = avroWriter.blockBuffer
 	}
-	
+
 	return avroWriter, nil
 }
 `
@@ -130,7 +133,7 @@ func (avroWriter *%v) WriteRecord(record %v) error {
 	avroWriter.nextBlockRecords += 1
 
 	// If the block if full, flush and reset the compressed writer,
-	// write the header and the block contents 
+	// write the header and the block contents
 	if avroWriter.nextBlockRecords >= avroWriter.recordsPerBlock {
 		return avroWriter.Flush()
 	}
@@ -147,7 +150,7 @@ func (avroWriter *%v) Flush() error {
 		fwWriter.Close()
 		fwWriter.Reset(avroWriter.blockBuffer)
 	}
-	
+
 	block := &AvroContainerBlock {
 		NumRecords: avroWriter.nextBlockRecords,
 		RecordBytes: avroWriter.blockBuffer.Bytes(),
@@ -157,9 +160,9 @@ func (avroWriter *%v) Flush() error {
 	if err != nil {
 		return err
 	}
-	
+
 	avroWriter.blockBuffer.Reset()
-	avroWriter.nextBlockRecords = 0	
+	avroWriter.nextBlockRecords = 0
 
 	return nil
 }
@@ -171,8 +174,12 @@ type AvroContainerWriter struct {
 }
 
 func NewAvroContainerWriter(schema []byte, record *types.RecordDefinition) *AvroContainerWriter {
+	// compact the schema
+	buf := &bytes.Buffer{}
+	json.Compact(buf, schema)
+
 	return &AvroContainerWriter{
-		schema: schema,
+		schema: buf.Bytes(),
 		record: record,
 	}
 }
@@ -226,4 +233,52 @@ func (a *AvroContainerWriter) AddAvroContainerWriter(p *generator.Package) {
 	p.AddFunction(a.filename(), "", a.constructor(), a.constructorDef())
 	p.AddFunction(a.filename(), a.name(), "WriteRecord", a.writeRecordDef())
 	p.AddFunction(a.filename(), a.name(), "Flush", a.flushDef())
+}
+
+func (a *AvroContainerWriter) AddCheckSchema(p *generator.Package) {
+	// Import guard, to avoid circular dependencies
+	if !p.HasFunction(a.filename(), "", "CheckSchema") {
+		p.AddImport(a.filename(), "encoding/json")
+		p.AddImport(a.filename(), "reflect")
+		p.AddImport(a.filename(), "fmt")
+		p.AddImport(a.filename(), "github.com/securityscorecard/go-schema-registry-client")
+
+		fnDef := fmt.Sprintf(`
+			func CheckSchema(c schemaregistry.Client) error {
+				type Schema struct {
+					Subject string `+"`json:\"subject\"`"+`
+					Version int `+"`json:\"version\"`"+`
+				}
+
+				// Get the generated schema info
+				var gsch Schema
+				if err := json.Unmarshal([]byte(%sSchema), &gsch); err != nil {
+					return fmt.Errorf("failed to unmarshal generated schema: %%s", err)
+				}
+
+				// Retrieve the schema from the registry
+				ssch, err := c.GetSchemaBySubject(gsch.Subject, gsch.Version)
+				if err != nil {
+					return fmt.Errorf("failed to retrieve schema from registry: %%s", err)
+				}
+
+				// Compare the two schemas
+				var a, b map[string]interface{}
+				if err := json.Unmarshal([]byte(%sSchema), &a); err != nil {
+					return fmt.Errorf("failed to unmarshal generated schema: %%s", err)
+				}
+				if err := json.Unmarshal([]byte(ssch.Schema), &b); err != nil {
+					return fmt.Errorf("failed to unmarshal schema from registry: %%s", err)
+				}
+
+				if !reflect.DeepEqual(a, b) {
+					return fmt.Errorf("warning: incompatible schemas")
+				}
+
+				return nil
+			}
+		`, a.record.GoType(), a.record.GoType())
+
+		p.AddFunction(a.filename(), a.name(), "CheckSchema", fnDef)
+	}
 }

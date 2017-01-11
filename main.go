@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -27,13 +28,13 @@ func main() {
 	pkg := generator.NewPackage(*packageName)
 
 	if *generateContainer {
-		err = addRecordDefinition([]byte(container.AVRO_BLOCK_SCHEMA), pkg, false)
+		err = addRecordDefinition([]byte(container.AVRO_BLOCK_SCHEMA), pkg, false, false)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error generating Avro container block schema - %v\n", err)
 			os.Exit(2)
 		}
 
-		err = addRecordDefinition([]byte(container.AVRO_HEADER_SCHEMA), pkg, false)
+		err = addRecordDefinition([]byte(container.AVRO_HEADER_SCHEMA), pkg, false, false)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error generating Avro container header schema - %v\n", err)
 			os.Exit(2)
@@ -47,7 +48,7 @@ func main() {
 			os.Exit(2)
 		}
 
-		err = addRecordDefinition(schema, pkg, *generateContainer)
+		err = addRecordDefinition(schema, pkg, *generateContainer, true)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error decoding schema for file %q - %v\n", fileName, err)
 			os.Exit(3)
@@ -66,7 +67,7 @@ func main() {
 	}
 }
 
-func addRecordDefinition(schema []byte, pkg *generator.Package, generateContainer bool) error {
+func addRecordDefinition(schema []byte, pkg *generator.Package, generateContainer bool, enhanceWithSSCStuff bool) error {
 	recordDefinition, err := types.RecordDefinitionForSchema(schema)
 	if err != nil {
 		return err
@@ -78,7 +79,43 @@ func addRecordDefinition(schema []byte, pkg *generator.Package, generateContaine
 	if generateContainer {
 		containerWriter := container.NewAvroContainerWriter(schema, recordDefinition)
 		containerWriter.AddAvroContainerWriter(pkg)
+
+		if enhanceWithSSCStuff {
+			// CheckSchema
+			containerWriter.AddCheckSchema(pkg)
+		}
 	}
+
+	if enhanceWithSSCStuff {
+		// GenerateID
+		type schemaUUIDKeys struct {
+			UUIDKeys []string `json:"uuid_keys"`
+		}
+
+		var schemaObj schemaUUIDKeys
+		if err := json.Unmarshal(schema, &schemaObj); err != nil {
+			return err
+		}
+
+		if len(schemaObj.UUIDKeys) > 0 {
+			recordDefinition.AddGenerateID(pkg, schemaObj.UUIDKeys)
+		}
+
+		// Metric
+		type schemaMetricTags struct {
+			MetricTags []string `json:"metric_tags"`
+		}
+
+		var smt schemaMetricTags
+		if err := json.Unmarshal(schema, &smt); err != nil {
+			return err
+		}
+
+		if len(smt.MetricTags) > 0 {
+			recordDefinition.AddMetric(pkg, smt.MetricTags)
+		}
+	}
+
 	return nil
 }
 

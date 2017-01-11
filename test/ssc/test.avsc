@@ -1,0 +1,12 @@
+{
+	"type": "record",
+	"name": "test_record",
+	"subject": "test_record",
+	"version": 1,
+	"fields": [
+		{"name": "id", "type": "string"},
+		{"name": "age", "type": "int"}
+	],
+	"uuid_keys": ["age"],
+	"metric_tags": ["age"]
+}
