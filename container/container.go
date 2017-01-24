@@ -32,7 +32,7 @@ const containerWriterTemplate = `
 type %v struct {
 	writer io.Writer
 	syncMarker [16]byte
-	codec Codec
+	codec avroutil.Codec
 	recordsPerBlock int64
 
 	blockBuffer *bytes.Buffer
@@ -80,7 +80,7 @@ func (w *snappyWriter) Reset(writer io.Writer) {
 `
 
 const containerWriterConstructorTemplate = `
-func %v(writer io.Writer, codec Codec, recordsPerBlock int64) (*%v, error) {
+func %v(writer io.Writer, codec avroutil.Codec, recordsPerBlock int64) (avroutil.Writer, error) {
 	blockBytes := make([]byte, 0)
 	blockBuffer := bytes.NewBuffer(blockBytes)
 	syncMarker := [16]byte{'g', 'o', 'g', 'e', 'n','a','v','r','o','m','a','g','i','c','1','0'}
@@ -108,14 +108,14 @@ func %v(writer io.Writer, codec Codec, recordsPerBlock int64) (*%v, error) {
 		blockBuffer: blockBuffer,
 	}
 
-	if codec == Deflate {
+	if codec == avroutil.Deflate {
 		avroWriter.compressedWriter, err = flate.NewWriter(avroWriter.blockBuffer, flate.DefaultCompression)
 		if err != nil {
 			return nil, err
 		}
-	} else if codec == Snappy {
+	} else if codec == avroutil.Snappy {
 		avroWriter.compressedWriter = newSnappyWriter(avroWriter.blockBuffer)
-	} else if codec == Null {
+	} else if codec == avroutil.Null {
 		avroWriter.compressedWriter = avroWriter.blockBuffer
 	}
 
@@ -124,7 +124,7 @@ func %v(writer io.Writer, codec Codec, recordsPerBlock int64) (*%v, error) {
 `
 
 const containerWriterWriteTemplate = `
-func (avroWriter *%v) WriteRecord(record %v) error {
+func (avroWriter *%v) WriteRecord(record avroutil.Serializable) error {
 	// Serialize the new record into the compressed writer
 	err := record.Serialize(avroWriter.compressedWriter)
 	if err != nil {
@@ -201,11 +201,11 @@ func (a *AvroContainerWriter) constructor() string {
 }
 
 func (a *AvroContainerWriter) constructorDef() string {
-	return fmt.Sprintf(containerWriterConstructorTemplate, a.constructor(), a.name(), a.schemaVariable(), a.name())
+	return fmt.Sprintf(containerWriterConstructorTemplate, a.constructor(), a.schemaVariable(), a.name())
 }
 
 func (a *AvroContainerWriter) writeRecordDef() string {
-	return fmt.Sprintf(containerWriterWriteTemplate, a.name(), a.record.GoType())
+	return fmt.Sprintf(containerWriterWriteTemplate, a.name())
 }
 
 func (a *AvroContainerWriter) schemaVariable() string {
@@ -220,6 +220,7 @@ func (a *AvroContainerWriter) AddAvroContainerWriter(p *generator.Package) {
 	p.AddImport(a.filename(), "io")
 	p.AddImport(a.filename(), "bytes")
 	p.AddImport(a.filename(), "compress/flate")
+	p.AddImport(a.filename(), "github.com/securityscorecard/go-avroutil")
 	p.AddImport(containerWriterCommonFile, "io")
 	p.AddImport(containerWriterCommonFile, "bytes")
 	p.AddImport(containerWriterCommonFile, "encoding/binary")
