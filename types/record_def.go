@@ -29,7 +29,7 @@ func %v(r io.Reader) (*%v, error) {
 `
 
 const recordStructPublicDeserializerTemplate = `
-func %v(r io.Reader) (*%v, error) {
+func %v(r io.Reader) (avroutil.Serializable, error) {
 	return %v(r)
 }
 `
@@ -96,7 +96,7 @@ func (r *RecordDefinition) publicSerializerMethodDef() string {
 }
 
 func (r *RecordDefinition) publicDeserializerMethodDef() string {
-	return fmt.Sprintf(recordStructPublicDeserializerTemplate, r.publicDeserializerMethod(), r.GoType(), r.deserializerMethod())
+	return fmt.Sprintf(recordStructPublicDeserializerTemplate, r.publicDeserializerMethod(), r.deserializerMethod())
 }
 
 func (r *RecordDefinition) filename() string {
@@ -129,6 +129,7 @@ func (r *RecordDefinition) AddDeserializer(p *generator.Package) {
 	// Import guard, to avoid circular dependencies
 	if !p.HasFunction(r.filename(), "", r.deserializerMethod()) {
 		p.AddImport(r.filename(), "io")
+		p.AddImport(r.filename(), "github.com/securityscorecard/go-avroutil")
 		p.AddFunction(UTIL_FILE, "", r.deserializerMethod(), r.deserializerMethodDef())
 		p.AddFunction(r.filename(), "", r.publicDeserializerMethod(), r.publicDeserializerMethodDef())
 		for _, f := range r.fields {
