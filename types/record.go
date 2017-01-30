@@ -3,8 +3,11 @@ package types
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/alanctgardner/gogen-avro/generator"
 	"strconv"
+
+	"github.com/alanctgardner/gogen-avro/generator"
+	mapstruct "github.com/rikonor/go-mapstruct"
+	"github.com/serenize/snaker"
 )
 
 const recordStructDefTemplate = `type %v struct {
@@ -39,9 +42,9 @@ func %v(r io.Reader) (%v, error) {
 `
 
 type RecordDefinition struct {
-	name    QualifiedName
-	aliases []QualifiedName
-	fields  []Field
+	name     QualifiedName
+	aliases  []QualifiedName
+	fields   []Field
 	metadata map[string]interface{}
 }
 
@@ -134,6 +137,9 @@ func (r *RecordDefinition) AddStruct(p *generator.Package) {
 			f.AddStruct(p)
 		}
 		p.AddFunction(r.filename(), r.GoType(), "Schema", r.schemaMethod())
+
+		// For Records we also want to add a GenearteID method
+		r.AddGenerateID(p)
 	}
 }
 
@@ -194,4 +200,53 @@ func (r *RecordDefinition) Schema(names map[QualifiedName]interface{}) interface
 		"name":   name,
 		"fields": fields,
 	}, r.metadata)
+}
+
+// AddGenerateID adds a GenerateID method which creates a uuidV5 from a set of fields
+func (r *RecordDefinition) AddGenerateID(p *generator.Package) {
+	// Import guard, to avoid circular dependencies
+	if !p.HasFunction(r.filename(), "", "GenerateID") {
+		p.AddImport(r.filename(), "fmt")
+		p.AddImport(r.filename(), "github.com/satori/go.uuid")
+
+		// Create function definition
+		fnDef := fmt.Sprintf(`
+			func (r %v) GenerateID() string {
+				s := fmt.Sprintf(%s)
+				return uuid.NewV5(uuid.NamespaceOID, s).String()
+			}
+		`, r.GoType(), r.uuidStrDef())
+
+		p.AddFunction(r.filename(), r.GoType(), "GenerateID", fnDef)
+	}
+}
+
+// uuidStrDef generates the fmt.Sprintf compatible input for the AddGenerateID method
+// e.g. for uuidKeys = []string{"A", "B"} => `"%v%v", A, B`
+func (r *RecordDefinition) uuidStrDef() string {
+	type Schema struct {
+		UUIDKeys []string `json:"uuid_keys"`
+	}
+
+	var schema Schema
+	if err := mapstruct.Decode(r.metadata, &schema); err != nil {
+		fmt.Printf("failed to decode metadata: %s\n", err)
+		return ""
+	}
+
+	fieldsToInclude := []string{}
+	for _, uuidKey := range schema.UUIDKeys {
+		fieldsToInclude = append(fieldsToInclude, snaker.SnakeToCamel(uuidKey))
+	}
+
+	strDef := `"`
+	for i := 0; i < len(fieldsToInclude); i++ {
+		strDef += "%v"
+	}
+	strDef += `"`
+	for _, fName := range fieldsToInclude {
+		strDef += fmt.Sprintf(", r.%s", fName)
+	}
+
+	return strDef
 }
