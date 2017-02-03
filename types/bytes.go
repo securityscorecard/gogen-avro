@@ -34,7 +34,7 @@ type bytesField struct {
 }
 
 func (s *bytesField) Name() string {
-	return generator.ToPublicName(s.name)
+	return s.name
 }
 
 func (s *bytesField) HasDefault() bool {

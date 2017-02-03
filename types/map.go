@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+
 	"github.com/alanctgardner/gogen-avro/generator"
 )
 
@@ -64,7 +65,7 @@ type mapField struct {
 	itemType     Field
 	hasDefault   bool
 	defaultValue interface{}
-	metadata map[string]interface{}
+	metadata     map[string]interface{}
 }
 
 func (s *mapField) HasDefault() bool {
@@ -76,7 +77,7 @@ func (s *mapField) Default() interface{} {
 }
 
 func (s *mapField) Name() string {
-	return generator.ToPublicName(s.name)
+	return s.name
 }
 
 func (s *mapField) FieldType() string {

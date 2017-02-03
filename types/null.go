@@ -30,7 +30,7 @@ func (s *nullField) Default() interface{} {
 }
 
 func (s *nullField) Name() string {
-	return generator.ToPublicName(s.name)
+	return s.name
 }
 
 func (s *nullField) FieldType() string {

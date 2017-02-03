@@ -39,7 +39,7 @@ type longField struct {
 }
 
 func (s *longField) Name() string {
-	return generator.ToPublicName(s.name)
+	return s.name
 }
 
 func (s *longField) HasDefault() bool {

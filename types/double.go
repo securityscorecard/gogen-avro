@@ -32,7 +32,7 @@ type doubleField struct {
 }
 
 func (s *doubleField) Name() string {
-	return generator.ToPublicName(s.name)
+	return s.name
 }
 
 func (s *doubleField) HasDefault() bool {
