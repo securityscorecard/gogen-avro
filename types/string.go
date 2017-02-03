@@ -55,7 +55,7 @@ func (s *stringField) Default() interface{} {
 }
 
 func (s *stringField) Name() string {
-	return generator.ToPublicName(s.name)
+	return s.name
 }
 
 func (s *stringField) FieldType() string {

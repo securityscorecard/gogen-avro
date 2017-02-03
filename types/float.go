@@ -69,7 +69,7 @@ func (s *floatField) Default() interface{} {
 }
 
 func (s *floatField) Name() string {
-	return generator.ToPublicName(s.name)
+	return s.name
 }
 
 func (s *floatField) FieldType() string {

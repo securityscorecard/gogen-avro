@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+
 	"github.com/alanctgardner/gogen-avro/generator"
 )
 
@@ -30,7 +31,7 @@ func (s *Reference) Definition() Definition {
 }
 
 func (s *Reference) Name() string {
-	return generator.ToPublicName(s.name)
+	return s.name
 }
 
 func (s *Reference) GoType() string {

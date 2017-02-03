@@ -67,7 +67,7 @@ func (r *RecordDefinition) FieldType() string {
 func (r *RecordDefinition) structFields() string {
 	var fieldDefinitions string
 	for _, f := range r.fields {
-		fieldDefinitions += fmt.Sprintf("%v %v\n", f.Name(), f.GoType())
+		fieldDefinitions += fmt.Sprintf("%v %v\n", generator.ToPublicName(f.Name()), f.GoType())
 	}
 	return fieldDefinitions
 }
@@ -75,7 +75,7 @@ func (r *RecordDefinition) structFields() string {
 func (r *RecordDefinition) fieldSerializers() string {
 	serializerMethods := "var err error\n"
 	for _, f := range r.fields {
-		serializerMethods += fmt.Sprintf("err = %v(r.%v, w)\nif err != nil {return err}\n", f.SerializerMethod(), f.Name())
+		serializerMethods += fmt.Sprintf("err = %v(r.%v, w)\nif err != nil {return err}\n", f.SerializerMethod(), generator.ToPublicName(f.Name()))
 	}
 	return serializerMethods
 }
@@ -83,7 +83,7 @@ func (r *RecordDefinition) fieldSerializers() string {
 func (r *RecordDefinition) fieldDeserializers() string {
 	deserializerMethods := ""
 	for _, f := range r.fields {
-		deserializerMethods += fmt.Sprintf("str.%v, err = %v(r)\nif err != nil {return nil, err}\n", f.Name(), f.DeserializerMethod())
+		deserializerMethods += fmt.Sprintf("str.%v, err = %v(r)\nif err != nil {return nil, err}\n", generator.ToPublicName(f.Name()), f.DeserializerMethod())
 	}
 	return deserializerMethods
 }

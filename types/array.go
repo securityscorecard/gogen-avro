@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+
 	"github.com/alanctgardner/gogen-avro/generator"
 )
 
@@ -58,11 +59,11 @@ type arrayField struct {
 	itemType     Field
 	hasDefault   bool
 	defaultValue interface{}
-	metadata map[string]interface{}
+	metadata     map[string]interface{}
 }
 
 func (s *arrayField) Name() string {
-	return generator.ToPublicName(s.name)
+	return s.name
 }
 
 func (s *arrayField) HasDefault() bool {

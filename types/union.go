@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+
 	"github.com/alanctgardner/gogen-avro/generator"
 )
 
@@ -28,7 +29,7 @@ func %v(r io.Reader) (%v, error) {
 	unionStr.UnionType = %v(field)
 	switch unionStr.UnionType {
 		%v
-	default:	
+	default:
 		return unionStr, fmt.Errorf("Invalid value for %v")
 	}
 	return unionStr, nil
@@ -51,7 +52,7 @@ func (s *unionField) Default() interface{} {
 }
 
 func (s *unionField) Name() string {
-	return generator.ToPublicName(s.name)
+	return s.name
 }
 
 func (s *unionField) FieldType() string {

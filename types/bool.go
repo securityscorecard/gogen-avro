@@ -8,13 +8,13 @@ const byteWriterInterface = `
 type ByteWriter interface {
 	Grow(int)
 	WriteByte(byte) error
-} 
+}
 `
 
 const byteReaderInterface = `
 type ByteReader interface {
 	ReadByte() (byte, error)
-} 
+}
 `
 
 const writeBoolMethod = `
@@ -65,7 +65,7 @@ type boolField struct {
 }
 
 func (s *boolField) Name() string {
-	return generator.ToPublicName(s.name)
+	return s.name
 }
 
 func (s *boolField) HasDefault() bool {

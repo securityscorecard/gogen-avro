@@ -95,7 +95,7 @@ func (s *intField) Default() interface{} {
 }
 
 func (s *intField) Name() string {
-	return generator.ToPublicName(s.name)
+	return s.name
 }
 
 func (s *intField) FieldType() string {
