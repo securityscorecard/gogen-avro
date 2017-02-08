@@ -108,9 +108,11 @@ func (avroWriter *Writer) Flush() error {
 		RecordBytes: avroWriter.blockBuffer.Bytes(),
 		Sync:        avroWriter.syncMarker,
 	}
-	err := block.Serialize(avroWriter.writer)
-	if err != nil {
-		return err
+	if avroWriter.headerWritten {
+		err := block.Serialize(avroWriter.writer)
+		if err != nil {
+			return err
+		}
 	}
 
 	avroWriter.blockBuffer.Reset()
