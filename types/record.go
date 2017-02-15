@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/alanctgardner/gogen-avro/generator"
 	mapstruct "github.com/rikonor/go-mapstruct"
@@ -138,8 +139,9 @@ func (r *RecordDefinition) AddStruct(p *generator.Package) {
 		}
 		p.AddFunction(r.filename(), r.GoType(), "Schema", r.schemaMethod())
 
-		// For Records we also want to add a GenearteID method
+		// For Records we also want to add a GenerateID and SendStats methods
 		r.AddGenerateID(p)
+		r.AddSendStats(p)
 	}
 }
 
@@ -249,4 +251,46 @@ func (r *RecordDefinition) uuidStrDef() string {
 	}
 
 	return strDef
+}
+
+// AddSendStats add a SendStats method which submits stats for this record
+func (r *RecordDefinition) AddSendStats(p *generator.Package) {
+	// Import guard, to avoid circular dependencies
+	if !p.HasFunction(r.filename(), "", "SendStats") {
+		p.AddImport(r.filename(), "fmt")
+		p.AddImport(r.filename(), "github.com/securityscorecard/go-stats")
+
+		// Create function definition
+		fnDef := fmt.Sprintf(`
+			func (r %v) SendStats(statser stats.Statser) {
+				statser.Count("%s", 1, stats.Tags{
+					%s
+				})
+			}
+		`, r.GoType(), r.name, r.metricTagsDef())
+
+		p.AddFunction(r.filename(), r.GoType(), "SendStats", fnDef)
+	}
+}
+
+func (r *RecordDefinition) metricTagsDef() string {
+	type Schema struct {
+		MetricTags []string `json:"metric_tags"`
+	}
+
+	var schema Schema
+	if err := mapstruct.Decode(r.metadata, &schema); err != nil {
+		fmt.Printf("failed to decode metadata: %s\n", err)
+		return ""
+	}
+
+	strDefParts := []string{}
+	for _, tag := range schema.MetricTags {
+		part := fmt.Sprintf(
+			`"%s": fmt.Sprint(r.%s),`,
+			tag, snaker.SnakeToCamel(tag),
+		)
+		strDefParts = append(strDefParts, part)
+	}
+	return strings.Join(strDefParts, "\n")
 }
