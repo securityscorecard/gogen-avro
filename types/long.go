@@ -36,6 +36,7 @@ type longField struct {
 	name         string
 	defaultValue int64
 	hasDefault   bool
+	schema       interface{}
 }
 
 func (s *longField) AvroName() string {
@@ -89,5 +90,8 @@ func (s *longField) ResolveReferences(n *Namespace) error {
 }
 
 func (s *longField) Schema(names map[QualifiedName]interface{}) interface{} {
-	return "long"
+	if s.schema == nil {
+		return "long"
+	}
+	return s.schema
 }

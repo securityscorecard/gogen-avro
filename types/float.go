@@ -58,6 +58,7 @@ type floatField struct {
 	name         string
 	defaultValue float32
 	hasDefault   bool
+	schema       interface{}
 }
 
 func (s *floatField) HasDefault() bool {
@@ -114,5 +115,8 @@ func (s *floatField) ResolveReferences(n *Namespace) error {
 }
 
 func (s *floatField) Schema(names map[QualifiedName]interface{}) interface{} {
-	return "float"
+	if s.schema == nil {
+		return "float"
+	}
+	return s.schema
 }

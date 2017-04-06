@@ -1,8 +1,6 @@
 package types
 
-import (
-	"github.com/alanctgardner/gogen-avro/generator"
-)
+import "github.com/alanctgardner/gogen-avro/generator"
 
 const stringWriterInterface = `
 type StringWriter interface {
@@ -44,6 +42,7 @@ type stringField struct {
 	name         string
 	defaultValue string
 	hasDefault   bool
+	schema       interface{}
 }
 
 func (s *stringField) HasDefault() bool {
@@ -100,5 +99,8 @@ func (s *stringField) ResolveReferences(n *Namespace) error {
 }
 
 func (s *stringField) Schema(names map[QualifiedName]interface{}) interface{} {
-	return "string"
+	if s.schema == nil {
+		return "string"
+	}
+	return s.schema
 }
