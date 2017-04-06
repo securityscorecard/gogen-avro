@@ -54,8 +54,12 @@ func (s *stringField) Default() interface{} {
 	return s.defaultValue
 }
 
-func (s *stringField) Name() string {
+func (s *stringField) AvroName() string {
 	return s.name
+}
+
+func (s *stringField) GoName() string {
+	return generator.ToPublicName(s.name)
 }
 
 func (s *stringField) FieldType() string {

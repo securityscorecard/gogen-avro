@@ -76,8 +76,12 @@ func (s *mapField) Default() interface{} {
 	return s.defaultValue
 }
 
-func (s *mapField) Name() string {
+func (s *mapField) AvroName() string {
 	return s.name
+}
+
+func (s *mapField) GoName() string {
+	return generator.ToPublicName(s.name)
 }
 
 func (s *mapField) FieldType() string {

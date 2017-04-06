@@ -3,7 +3,7 @@ gogen-avro
 
 [![Build Status](https://travis-ci.org/alanctgardner/gogen-avro.svg?branch=master)](https://travis-ci.org/alanctgardner/gogen-avro)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/alanctgardner/gogen-avro/master/LICENSE)
-[![Version 3.0.1](https://img.shields.io/badge/version-3.0.1-lightgrey.svg)](https://gopkg.in/alanctgardner/gogen-avro.v3)
+[![Version 4.0.1](https://img.shields.io/badge/version-4.0.1-lightgrey.svg)](https://gopkg.in/alanctgardner/gogen-avro.v4)
 
 Generate Go structures and serializer / deserializer methods from Avro schemas. Generated serializers/deserializers are 2-8x faster than goavro, and you get compile-time safety for getting and setting fields.
 
@@ -12,7 +12,7 @@ Generate Go structures and serializer / deserializer methods from Avro schemas. 
 gogen-avro is a tool which you install on your system (usually on your GOPATH), and run as part of your build process. To install gogen-avro to `$GOPATH/bin/`, run:
 
 ```
-go get gopkg.in/alanctgardner/gogen-avro.v3/...
+go get gopkg.in/alanctgardner/gogen-avro.v4/...
 ```
 
 ### Usage
@@ -20,26 +20,26 @@ go get gopkg.in/alanctgardner/gogen-avro.v3/...
 To generate Go source files from one or more Avro schema files, run:
 
 ```
-gogen-avro.v3 [--container] [--package=<package name>] <output directory> <avro schema files>
+gogen-avro.v4 [--package=<package name>] <output directory> <avro schema files>
 ```
 
 You can also use a `go:generate` directive in a source file ([example](https://github.com/alanctgardner/gogen-avro/blob/master/test/primitive/schema_test.go)):
 
 ```
-//go:generate $GOPATH/bin/gogen-avro.v3 . primitives.avsc
+//go:generate $GOPATH/bin/gogen-avro.v4 . primitives.avsc
 ```
 
 The generated source files contain structs for each schema, plus a function `Serialize(io.Writer)` to encode the contents into the given `io.Writer`, and `Deserialize<RecordType>(io.Reader)` to read a struct from the given `io.Reader`.
 
 ### Container File Support
 
-_Container file support is still being worked on - please report any bugs you find_
-
-gogen-avro will generate structs for each record type defined in the supplied schemas. Container file support is implemented in a generic way for all generated structs. The package `container` has a `Writer` which wraps an `io.Writer` and accepts some arguments for block size (in records) and codec (for compression). 
+gogen-avro generates a struct for each record type defined in the supplied schemas. Container file support is implemented in a generic way for all generated structs. The package `container` has a `Writer` which wraps an `io.Writer` and accepts some arguments for block size (in records) and codec (for compression). 
 
 The `WriteRecord` method in `container.Writer` accepts an `AvroRecord`, which is an interface implemented by every generated record struct. 
 
 An example of how to write a container file can be found in `example/container/example.go`.
+
+[Godocs for the container package](https://godoc.org/github.com/alanctgardner/gogen-avro/container)
 
 ### Example
 
@@ -53,6 +53,16 @@ go generate github.com/alanctgardner/gogen-avro/example
 go install github.com/alanctgardner/gogen-avro/example/record
 go install github.com/alanctgardner/gogen-avro/example/container
 ```
+
+### Naming
+
+Gogen-avro converts field and type names to be valid, public Go names using snaker (github.com/serenize/snaker). 
+As a result the generated structs may have names that are slightly different from the names in the Avro schema - 
+illegal characters will be removed and the first character will be upper-case. 
+
+Gogen-avro respects namespaces and aliases when resolving type names. However, generated files will all be placed directly
+into the package specified by the user. This may cause issues in rare cases where two types have different namespaces but the
+same name.
 
 ### Type Conversion
 
@@ -91,13 +101,6 @@ const (
 )
 ```
 
-### TODO / Caveats
-
-This package doesn't implement the entire Avro 1.7.7 specification, specifically:
-
-- Schema resolution
-- Framing - generate RPCs and container format readers/writers
-
 ### Versioning
 
 This tool is versioned using [gopkg.in](http://labix.org/gopkg.in).
@@ -108,6 +111,13 @@ The API is guaranteed to be stable within a release. This guarantee applies to:
 
 Only bugfixes will be backported to existing major releases.
 This means that source files generated with the same major release may differ, but they will never break your build.
+
+4.0
+---
+- Support for writing object container files is no longer experimental
+- `container` package now works with the generated code for any record type
+- Aliases and namespaces are now used properly to resolve types
+- Record structs expose a `Schema` method which includes metadata from the schema definition 
 
 3.0
 ---
