@@ -304,9 +304,65 @@ func (n *Namespace) decodeComplexDefinition(namespace, nameStr string, typeMap m
 			}
 		}
 		return &stringField{
-			name: nameStr,
+			name:         nameStr,
 			defaultValue: defStr,
-			hasDefault: hasDef,
+			hasDefault:   hasDef,
+		}, nil
+	case "int":
+		var defVal int
+		var ok bool
+		if hasDef {
+			defVal, ok = def.(int)
+			if !ok {
+				return nil, fmt.Errorf("Default value must be int type")
+			}
+		}
+		return &intField{
+			name:         nameStr,
+			defaultValue: int32(defVal),
+			hasDefault:   hasDef,
+		}, nil
+	case "long":
+		var defVal int
+		var ok bool
+		if hasDef {
+			defVal, ok = def.(int)
+			if !ok {
+				return nil, fmt.Errorf("Default value must be int type")
+			}
+		}
+		return &longField{
+			name:         nameStr,
+			defaultValue: int64(defVal),
+			hasDefault:   hasDef,
+		}, nil
+	case "float":
+		var defVal float32
+		var ok bool
+		if hasDef {
+			defVal, ok = def.(float32)
+			if !ok {
+				return nil, fmt.Errorf("Default value must be float type")
+			}
+		}
+		return &floatField{
+			name:         nameStr,
+			defaultValue: defVal,
+			hasDefault:   hasDef,
+		}, nil
+	case "double":
+		var defVal float64
+		var ok bool
+		if hasDef {
+			defVal, ok = def.(float64)
+			if !ok {
+				return nil, fmt.Errorf("Default value must be float type")
+			}
+		}
+		return &doubleField{
+			name:         nameStr,
+			defaultValue: defVal,
+			hasDefault:   hasDef,
 		}, nil
 	case "array":
 		items, ok := typeMap["items"]
