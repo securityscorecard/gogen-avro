@@ -1,0 +1,11 @@
+{
+	"type": "record",
+	"name": "PrimitiveTestRecord",
+	"fields": [
+		{"name": "IntField", "type": {"type": "int", "logicalType": "timestamp-millis"}},
+		{"name": "LongField", "type": {"type": "long"}},
+		{"name": "FloatField", "type": {"type": "float"}},
+		{"name": "DoubleField", "type": {"type": "double"}},
+		{"name": "StringField", "type": {"type": "string", "logicalType": "uuid"}}
+	]
+}

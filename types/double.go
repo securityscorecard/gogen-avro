@@ -29,6 +29,7 @@ type doubleField struct {
 	name         string
 	defaultValue float64
 	hasDefault   bool
+	schema       interface{}
 }
 
 func (s *doubleField) AvroName() string {
@@ -85,5 +86,8 @@ func (s *doubleField) ResolveReferences(n *Namespace) error {
 }
 
 func (s *doubleField) Schema(names map[QualifiedName]interface{}) interface{} {
-	return "double"
+	if s.schema == nil {
+		return "double"
+	}
+	return s.schema
 }

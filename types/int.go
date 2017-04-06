@@ -84,6 +84,7 @@ type intField struct {
 	name         string
 	defaultValue int32
 	hasDefault   bool
+	schema       interface{}
 }
 
 func (s *intField) HasDefault() bool {
@@ -137,5 +138,8 @@ func (s *intField) ResolveReferences(n *Namespace) error {
 }
 
 func (s *intField) Schema(names map[QualifiedName]interface{}) interface{} {
-	return "int"
+	if s.schema == nil {
+		return "int"
+	}
+	return s.schema
 }

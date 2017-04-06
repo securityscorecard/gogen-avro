@@ -307,6 +307,7 @@ func (n *Namespace) decodeComplexDefinition(namespace, nameStr string, typeMap m
 			name:         nameStr,
 			defaultValue: defStr,
 			hasDefault:   hasDef,
+			schema:       typeMap,
 		}, nil
 	case "int":
 		var defVal int
@@ -321,6 +322,7 @@ func (n *Namespace) decodeComplexDefinition(namespace, nameStr string, typeMap m
 			name:         nameStr,
 			defaultValue: int32(defVal),
 			hasDefault:   hasDef,
+			schema:       typeMap,
 		}, nil
 	case "long":
 		var defVal int
@@ -335,6 +337,7 @@ func (n *Namespace) decodeComplexDefinition(namespace, nameStr string, typeMap m
 			name:         nameStr,
 			defaultValue: int64(defVal),
 			hasDefault:   hasDef,
+			schema:       typeMap,
 		}, nil
 	case "float":
 		var defVal float32
@@ -349,6 +352,7 @@ func (n *Namespace) decodeComplexDefinition(namespace, nameStr string, typeMap m
 			name:         nameStr,
 			defaultValue: defVal,
 			hasDefault:   hasDef,
+			schema:       typeMap,
 		}, nil
 	case "double":
 		var defVal float64
@@ -363,6 +367,7 @@ func (n *Namespace) decodeComplexDefinition(namespace, nameStr string, typeMap m
 			name:         nameStr,
 			defaultValue: defVal,
 			hasDefault:   hasDef,
+			schema:       typeMap,
 		}, nil
 	case "array":
 		items, ok := typeMap["items"]
@@ -461,7 +466,11 @@ func (n *Namespace) createFieldStruct(namespace, nameStr, typeStr string, def in
 			}
 
 		}
-		return &stringField{nameStr, defStr, hasDef}, nil
+		return &stringField{
+			name:         nameStr,
+			defaultValue: defStr,
+			hasDefault:   hasDef,
+		}, nil
 	case "int":
 		var defInt int32
 		if hasDef {
@@ -472,7 +481,11 @@ func (n *Namespace) createFieldStruct(namespace, nameStr, typeStr string, def in
 			defInt = int32(defFloat)
 
 		}
-		return &intField{nameStr, defInt, hasDef}, nil
+		return &intField{
+			name:         nameStr,
+			defaultValue: defInt,
+			hasDefault:   hasDef,
+		}, nil
 	case "long":
 		var defInt int64
 		if hasDef {
@@ -482,7 +495,11 @@ func (n *Namespace) createFieldStruct(namespace, nameStr, typeStr string, def in
 			}
 			defInt = int64(defFloat)
 		}
-		return &longField{nameStr, defInt, hasDef}, nil
+		return &longField{
+			name:         nameStr,
+			defaultValue: defInt,
+			hasDefault:   hasDef,
+		}, nil
 	case "float":
 		var defFloat float64
 		var ok bool
@@ -492,7 +509,11 @@ func (n *Namespace) createFieldStruct(namespace, nameStr, typeStr string, def in
 				return nil, fmt.Errorf("Field %q default must be float type", nameStr)
 			}
 		}
-		return &floatField{nameStr, float32(defFloat), hasDef}, nil
+		return &floatField{
+			name:         nameStr,
+			defaultValue: float32(defFloat),
+			hasDefault:   hasDef,
+		}, nil
 	case "double":
 		var defFloat float64
 		var ok bool
@@ -502,7 +523,11 @@ func (n *Namespace) createFieldStruct(namespace, nameStr, typeStr string, def in
 				return nil, fmt.Errorf("Field %q default must be float type", nameStr)
 			}
 		}
-		return &doubleField{nameStr, defFloat, hasDef}, nil
+		return &doubleField{
+			name:         nameStr,
+			defaultValue: defFloat,
+			hasDefault:   hasDef,
+		}, nil
 	case "boolean":
 		var defBool bool
 		var ok bool
@@ -513,7 +538,11 @@ func (n *Namespace) createFieldStruct(namespace, nameStr, typeStr string, def in
 			}
 
 		}
-		return &boolField{nameStr, defBool, hasDef}, nil
+		return &boolField{
+			name:         nameStr,
+			defaultValue: defBool,
+			hasDefault:   hasDef,
+		}, nil
 	case "bytes":
 		var defBytes []byte
 		if hasDef {
@@ -523,7 +552,11 @@ func (n *Namespace) createFieldStruct(namespace, nameStr, typeStr string, def in
 			}
 			defBytes = []byte(defString)
 		}
-		return &bytesField{nameStr, defBytes, hasDef}, nil
+		return &bytesField{
+			name:         nameStr,
+			defaultValue: defBytes,
+			hasDefault:   hasDef,
+		}, nil
 	case "null":
 		return &nullField{nameStr, hasDef}, nil
 	default:
