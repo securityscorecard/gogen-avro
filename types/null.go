@@ -29,8 +29,12 @@ func (s *nullField) Default() interface{} {
 	return nil
 }
 
-func (s *nullField) Name() string {
+func (s *nullField) AvroName() string {
 	return s.name
+}
+
+func (s *nullField) GoName() string {
+	return generator.ToPublicName(s.name)
 }
 
 func (s *nullField) FieldType() string {

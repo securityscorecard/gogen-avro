@@ -30,8 +30,12 @@ func (s *Reference) Definition() Definition {
 	return s.def
 }
 
-func (s *Reference) Name() string {
+func (s *Reference) AvroName() string {
 	return s.name
+}
+
+func (s *Reference) GoName() string {
+	return generator.ToPublicName(s.name)
 }
 
 func (s *Reference) GoType() string {

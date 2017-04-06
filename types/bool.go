@@ -64,8 +64,12 @@ type boolField struct {
 	hasDefault   bool
 }
 
-func (s *boolField) Name() string {
+func (s *boolField) AvroName() string {
 	return s.name
+}
+
+func (s *boolField) GoName() string {
+	return generator.ToPublicName(s.name)
 }
 
 func (s *boolField) HasDefault() bool {
