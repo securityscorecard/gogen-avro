@@ -88,7 +88,7 @@ func TestRoundTrip(t *testing.T) {
 }
 
 func TestSchema(t *testing.T) {
-	expectedSchemaStr := []byte(`{"fields":[{"name":"IntField","type":{"type":"int"}},{"name":"LongField","type":{"type":"long"}},{"name":"FloatField","type":{"type":"float"}},{"name":"DoubleField","type":{"type":"double"}},{"name":"StringField","type":{"type":"string"}}],"name":"PrimitiveTestRecord","type":"record"}`)
+	expectedSchemaStr := []byte(`{"fields":[{"name":"IntField","type":{"type":"int","logicalType":"timestamp-millis"}},{"name":"LongField","type":{"type":"long"}},{"name":"FloatField","type":{"type":"float"}},{"name":"DoubleField","type":{"type":"double"}},{"name":"StringField","type":{"type":"string","logicalType":"uuid"}}],"name":"PrimitiveTestRecord","type":"record"}`)
 	var expectedSchema interface{}
 	if err := json.Unmarshal(expectedSchemaStr, &expectedSchema); err != nil {
 		t.Fatalf("failed to unmarshal expected schema: %s", err)
