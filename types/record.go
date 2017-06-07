@@ -236,18 +236,71 @@ func (r *RecordDefinition) uuidStrDef() string {
 		return ""
 	}
 
-	fieldsToInclude := []string{}
+	type uuidField struct {
+		Name string
+		Type string
+	}
+
+	allowedFieldTypes := map[string]bool{
+		"string": true, "[]string": true,
+		"bool": true, "[]bool": true,
+		"byte": true, "[]byte": true,
+
+		// int
+		"int": true, "[]int": true,
+		"int32": true, "[]int32": true,
+		"int64": true, "[]int64": true,
+
+		// float
+		"float32": true, "[]float32": true,
+		"float64": true, "[]float64": true,
+	}
+
+	availFields := map[string]string{}
+	for _, f := range r.fields {
+		// primitive case
+		if _, ok := allowedFieldTypes[f.GoType()]; ok {
+			availFields[f.GoName()] = f.GoType()
+		}
+
+		// TODO: handle record type so we can get nested fields
+		// record type
+		// rec, ok := f.(*RecordDefinition)
+		// if ok {
+		// 	for _, ff := range rec.fields {
+		// 		if _, ok := allowedFieldTypes[f.GoType()]; ok {
+		// 			availFields = append(availFields, uuidField{
+		// 				Name: ff.GoName(),
+		// 				Type: ff.GoType(),
+		// 			})
+		// 		}
+		// 	}
+		// }
+	}
+
+	// uuidToFieldName is an auxiliary function to convert a uuid_key name to
+	// an appropriate Go CamelCased name.
+	uuidToFieldName := func(uuidKey string) string {
+		ps := []string{}
+		for _, p := range strings.Split(uuidKey, ".") {
+			ps = append(ps, snaker.SnakeToCamel(p))
+		}
+		return strings.Join(ps, ".")
+	}
+
+	fieldsToInclude := []uuidField{}
 	for _, uuidKey := range schema.UUIDKeys {
-		fieldsToInclude = append(fieldsToInclude, snaker.SnakeToCamel(uuidKey))
+		fName := uuidToFieldName(uuidKey)
+		fieldsToInclude = append(fieldsToInclude, uuidField{Name: fName, Type: availFields[fName]})
 	}
 
 	strDef := `"`
 	for i := 0; i < len(fieldsToInclude); i++ {
-		strDef += "%v"
+		strDef += "%s"
 	}
 	strDef += `"`
-	for _, fName := range fieldsToInclude {
-		strDef += fmt.Sprintf(", r.%s", fName)
+	for _, fti := range fieldsToInclude {
+		strDef += fmt.Sprintf(", %s(r.%s)", typeSerializerFuncs[fti.Type], fti.Name)
 	}
 
 	return strDef

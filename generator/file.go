@@ -13,21 +13,23 @@ import (
 File represents a Go source file in the output package
 */
 type File struct {
-	name      string
-	headers   []string
-	functions map[FunctionName]string
-	structs   map[string]string
-	imports   map[string]interface{}
-	constants map[string]interface{}
+	name       string
+	headers    []string
+	functions  map[FunctionName]string
+	structs    map[string]string
+	imports    map[string]interface{}
+	constants  map[string]interface{}
+	rawContent string
 }
 
 func NewFile(name string) *File {
 	return &File{
-		name:      name,
-		functions: make(map[FunctionName]string),
-		structs:   make(map[string]string),
-		imports:   make(map[string]interface{}),
-		constants: make(map[string]interface{}),
+		name:       name,
+		functions:  make(map[FunctionName]string),
+		structs:    make(map[string]string),
+		imports:    make(map[string]interface{}),
+		constants:  make(map[string]interface{}),
+		rawContent: "",
 	}
 }
 
@@ -45,7 +47,7 @@ type FunctionName struct {
 TODO: It'd be better to group funcs attached to a struct with the struct definition
 */
 func (f *File) WriteFile(pkgName, targetFile string) error {
-	src := fmt.Sprintf("%v\n\npackage %v\n%v\n%v\n%v\n%v\n", f.headerString(), pkgName, f.importString(), f.constantString(), f.structString(), f.functionString())
+	src := fmt.Sprintf("%v\n\npackage %v\n%v\n%v\n%v\n%v\n%s\n", f.headerString(), pkgName, f.importString(), f.constantString(), f.structString(), f.functionString(), f.rawContent)
 	fileContent, err := format.Source([]byte(src))
 	if err != nil {
 		return fmt.Errorf("Error formatting file %v - %v\n\nContents: %v", f.name, err, src)
