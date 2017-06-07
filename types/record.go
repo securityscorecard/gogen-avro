@@ -255,6 +255,9 @@ func (r *RecordDefinition) uuidStrDef() string {
 		// float
 		"float32": true, "[]float32": true,
 		"float64": true, "[]float64": true,
+
+		// ip
+		"IPAddress": true,
 	}
 
 	availFields := map[string]string{}

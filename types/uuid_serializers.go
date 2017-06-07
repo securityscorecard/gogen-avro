@@ -19,12 +19,27 @@ var typeSerializerFuncs = map[string]string{
 	// float
 	"float32": "floatSerializer", "[]float32": "floatSliceSerializer",
 	"float64": "floatSerializer", "[]float64": "floatSliceSerializer",
+
+	// IP related
+	"IPAddress": "ipSerializer",
 }
 
 var uuidSerializersFileContent = `
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+)
 
 type fieldTypeSerializer func(interface{}) string
+
+var ipSerializer = fieldTypeSerializer(func(i interface{}) string {
+	vs := reflect.ValueOf(i).Convert(reflect.TypeOf([16]byte{})).Interface().([16]byte)
+	out := ""
+	for _, v := range vs {
+		out += fmt.Sprintf("%d", v)
+	}
+	return out
+})
 
 var byteSerializer = fieldTypeSerializer(func(i interface{}) string {
 	v := i.(byte)
