@@ -6,6 +6,24 @@ func AddUUIDSerializerToPackage(pkg *generator.Package) {
 	pkg.AddFile("uuid_serializers.go", uuidSerializersFileContent)
 }
 
+var allowedFieldTypes = map[string]bool{
+	"string": true, "[]string": true,
+	"bool": true, "[]bool": true,
+	"byte": true, "[]byte": true,
+
+	// int
+	"int": true, "[]int": true,
+	"int32": true, "[]int32": true,
+	"int64": true, "[]int64": true,
+
+	// float
+	"float32": true, "[]float32": true,
+	"float64": true, "[]float64": true,
+
+	// ip
+	"IPAddress": true,
+}
+
 var typeSerializerFuncs = map[string]string{
 	"byte": "byteSerializer", "[]byte": "byteSliceSerializer",
 	"bool": "boolSerializer", "[]bool": "boolSliceSerializer",

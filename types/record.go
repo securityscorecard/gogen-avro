@@ -224,6 +224,39 @@ func (r *RecordDefinition) AddGenerateID(p *generator.Package) {
 	}
 }
 
+func extractAvailableFields(f Field) map[string]string {
+	availableFields := map[string]string{}
+
+	// primitive case
+	if _, ok := allowedFieldTypes[f.GoType()]; ok {
+		availableFields[f.GoName()] = f.GoType()
+		return availableFields
+	}
+
+	// reference type
+	ref, ok := f.(*Reference)
+	if ok {
+		// fixed type
+		// pass
+
+		// record type
+		rec, ok := ref.def.(*RecordDefinition)
+		if ok {
+			for _, f := range rec.fields {
+				moreAvailableFields := extractAvailableFields(f)
+
+				// update availableFields with moreAvailableFields
+				for fn, ft := range moreAvailableFields {
+					fullFieldName := fmt.Sprintf("%s.%s", rec.FieldType(), fn)
+					availableFields[fullFieldName] = ft
+				}
+			}
+		}
+	}
+
+	return availableFields
+}
+
 // uuidStrDef generates the fmt.Sprintf compatible input for the AddGenerateID method
 // e.g. for uuidKeys = []string{"A", "B"} => `"%v%v", A, B`
 func (r *RecordDefinition) uuidStrDef() string {
@@ -237,49 +270,13 @@ func (r *RecordDefinition) uuidStrDef() string {
 		return ""
 	}
 
-	type uuidField struct {
-		Name string
-		Type string
-	}
-
-	allowedFieldTypes := map[string]bool{
-		"string": true, "[]string": true,
-		"bool": true, "[]bool": true,
-		"byte": true, "[]byte": true,
-
-		// int
-		"int": true, "[]int": true,
-		"int32": true, "[]int32": true,
-		"int64": true, "[]int64": true,
-
-		// float
-		"float32": true, "[]float32": true,
-		"float64": true, "[]float64": true,
-
-		// ip
-		"IPAddress": true,
-	}
-
-	availFields := map[string]string{}
+	// Extract fields from the schema which can be used for uuid generation
+	availableFields := map[string]string{}
 	for _, f := range r.fields {
-		// primitive case
-		if _, ok := allowedFieldTypes[f.GoType()]; ok {
-			availFields[f.GoName()] = f.GoType()
+		moreAvailableFields := extractAvailableFields(f)
+		for fn, ft := range moreAvailableFields {
+			availableFields[fn] = ft
 		}
-
-		// TODO: handle record type so we can get nested fields
-		// record type
-		// rec, ok := f.(*RecordDefinition)
-		// if ok {
-		// 	for _, ff := range rec.fields {
-		// 		if _, ok := allowedFieldTypes[f.GoType()]; ok {
-		// 			availFields = append(availFields, uuidField{
-		// 				Name: ff.GoName(),
-		// 				Type: ff.GoType(),
-		// 			})
-		// 		}
-		// 	}
-		// }
 	}
 
 	// uuidToFieldName is an auxiliary function to convert a uuid_key name to
@@ -292,15 +289,21 @@ func (r *RecordDefinition) uuidStrDef() string {
 		return strings.Join(ps, ".")
 	}
 
+	type uuidField struct {
+		Name string
+		Type string
+	}
+
+	// decide on which keys are to be used for uuid generation
 	fieldsToInclude := []uuidField{}
 	for _, uuidKey := range schema.UUIDKeys {
 		fName := uuidToFieldName(uuidKey)
-		if _, ok := availFields[fName]; !ok {
+		if _, ok := availableFields[fName]; !ok {
 			fmt.Printf("Error: can't use %s as a uuid key\n", uuidKey)
 			os.Exit(1)
 		}
 
-		fieldsToInclude = append(fieldsToInclude, uuidField{Name: fName, Type: availFields[fName]})
+		fieldsToInclude = append(fieldsToInclude, uuidField{Name: fName, Type: availableFields[fName]})
 	}
 
 	strDef := `"`
