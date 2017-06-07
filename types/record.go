@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -291,6 +292,11 @@ func (r *RecordDefinition) uuidStrDef() string {
 	fieldsToInclude := []uuidField{}
 	for _, uuidKey := range schema.UUIDKeys {
 		fName := uuidToFieldName(uuidKey)
+		if _, ok := availFields[fName]; !ok {
+			fmt.Printf("Error: can't use %s as a uuid key\n", uuidKey)
+			os.Exit(1)
+		}
+
 		fieldsToInclude = append(fieldsToInclude, uuidField{Name: fName, Type: availFields[fName]})
 	}
 
