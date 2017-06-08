@@ -9,20 +9,90 @@
             "type": "string"
         },
         {
+            "name": "string_array",
+            "type": {
+              "type": "array",
+              "items": "string"
+            }
+        },
+        {
+            "name": "nullable_string",
+            "type": ["null", "string"]
+        },
+        {
             "name": "boolean",
             "type": "boolean"
+        },
+        {
+            "name": "boolean_array",
+            "type": {
+              "type": "array",
+              "items": "boolean"
+            }
+        },
+        {
+            "name": "nullable_boolean",
+            "type": ["null", "boolean"]
         },
         {
             "name": "int",
             "type": "int"
         },
         {
+            "name": "int_array",
+            "type": {
+              "type": "array",
+              "items": "int"
+            }
+        },
+        {
+            "name": "nullable_int",
+            "type": ["null", "int"]
+        },
+        {
             "name": "long",
             "type": "long"
         },
         {
+            "name": "long_array",
+            "type": {
+              "type": "array",
+              "items": "long"
+            }
+        },
+        {
+            "name": "nullable_long",
+            "type": ["null", "long"]
+        },
+        {
+            "name": "float",
+            "type": "float"
+        },
+        {
+            "name": "float_array",
+            "type": {
+              "type": "array",
+              "items": "float"
+            }
+        },
+        {
+            "name": "nullable_float",
+            "type": ["null", "float"]
+        },
+        {
             "name": "double",
             "type": "double"
+        },
+        {
+            "name": "double_array",
+            "type": {
+              "type": "array",
+              "items": "double"
+            }
+        },
+        {
+            "name": "nullable_double",
+            "type": ["null", "double"]
         },
         {
             "name": "ip_address",
@@ -51,8 +121,21 @@
         "boolean",
         "int",
         "long",
+        "float",
         "double",
         "ip_address",
-        "object.name"
+        "object.name",
+        "string_array",
+        "boolean_array",
+        "int_array",
+        "long_array",
+        "float_array",
+        "double_array",
+        "nullable_string",
+        "nullable_boolean",
+        "nullable_int",
+        "nullable_long",
+        "nullable_float",
+        "nullable_double"
     ]
 }

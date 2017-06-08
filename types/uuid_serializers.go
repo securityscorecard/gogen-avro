@@ -182,7 +182,7 @@ var intSliceSerializer = `
 	func intSliceSerializer(vs []int) string {
 		out := ""
 		for _, v := range vs {
-			out += intSerializer(v)
+			out += fmt.Sprintf("%d", v)
 		}
 		return out
 	}
@@ -192,7 +192,7 @@ var int32SliceSerializer = `
 	func int32SliceSerializer(vs []int32) string {
 		out := ""
 		for _, v := range vs {
-			out += int32Serializer(v)
+			out += fmt.Sprintf("%d", v)
 		}
 		return out
 	}
@@ -202,7 +202,7 @@ var int64SliceSerializer = `
 	func int64SliceSerializer(vs []int64) string {
 		out := ""
 		for _, v := range vs {
-			out += int64Serializer(v)
+			out += fmt.Sprintf("%d", v)
 		}
 		return out
 	}
@@ -226,7 +226,7 @@ var float32SliceSerializer = `
 	func float32SliceSerializer(vs []float32) string {
 		out := ""
 		for _, v := range vs {
-			out += float32Serializer(v)
+			out += fmt.Sprintf("%.4f", v)
 		}
 		return out
 	}
@@ -236,7 +236,7 @@ var float64SliceSerializer = `
 	func float64SliceSerializer(vs []float64) string {
 		out := ""
 		for _, v := range vs {
-			out += float64Serializer(v)
+			out += fmt.Sprintf("%.4f", v)
 		}
 		return out
 	}
