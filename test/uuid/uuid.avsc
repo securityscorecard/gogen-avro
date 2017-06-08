@@ -1,0 +1,58 @@
+{
+    "type": "record",
+    "namespace": "com.securityscorecard.collections",
+    "name": "uuid",
+    "subject": "com.securityscorecard.collections.uuid",
+    "fields": [
+        {
+            "name": "string",
+            "type": "string"
+        },
+        {
+            "name": "boolean",
+            "type": "boolean"
+        },
+        {
+            "name": "int",
+            "type": "int"
+        },
+        {
+            "name": "long",
+            "type": "long"
+        },
+        {
+            "name": "double",
+            "type": "double"
+        },
+        {
+            "name": "ip_address",
+            "type": {
+                "type": "fixed",
+                "size": 16,
+                "name": "ip_address"
+            }
+        },
+        {
+            "name": "object",
+            "type": {
+                "name": "object",
+                "type": "record",
+                "fields": [
+                    {
+                        "name": "name",
+                        "type": "string"
+                    }
+                ]
+            }
+        }
+    ],
+    "uuid_keys": [
+        "string",
+        "boolean",
+        "int",
+        "long",
+        "double",
+        "ip_address",
+        "object.name"
+    ]
+}
