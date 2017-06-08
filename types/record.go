@@ -233,6 +233,27 @@ func extractAvailableFields(f Field) map[string]string {
 		return availableFields
 	}
 
+	// union case
+	un, ok := f.(*unionField)
+	if ok {
+		fmt.Println(f.GoType())
+
+		// Only allow a union of two types where the first type is nil
+		if len(un.itemType) != 2 {
+			panic("unions are only allowed to contain two types")
+		}
+		if _, ok := un.itemType[0].(*nullField); !ok {
+			panic("unions must have null as their first type")
+		}
+
+		// The second type must be an allowed type
+		typ := un.itemType[1].GoType()
+		if _, ok := allowedFieldTypes[typ]; ok {
+			availableFields[f.GoName()] = f.GoType()
+			return availableFields
+		}
+	}
+
 	// reference type
 	ref, ok := f.(*Reference)
 	if ok {
@@ -312,7 +333,13 @@ func (r *RecordDefinition) uuidStrDef() string {
 	}
 	strDef += `"`
 	for _, fti := range fieldsToInclude {
-		strDef += fmt.Sprintf(", %s(r.%s)", typeSerializerFuncs[fti.Type], fti.Name)
+		serializerFn, ok := typeSerializerFuncs[fti.Type]
+		if !ok {
+			fmt.Printf("Error: no serializer available for %s for use as a uuid key\n", fti.Name)
+			os.Exit(1)
+		}
+
+		strDef += fmt.Sprintf(", %s(r.%s)", serializerFn, fti.Name)
 	}
 
 	return strDef

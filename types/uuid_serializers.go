@@ -24,6 +24,15 @@ var allowedFieldTypes = map[string]bool{
 
 	// ip
 	"IPAddress": true,
+
+	// unions
+	"UnionNullString":    true,
+	"UnionNullInt":       true,
+	"UnionNullLong":      true,
+	"UnionNullFloat":     true,
+	"UnionNullDouble":    true,
+	"UnionNullBool":      true,
+	"UnionNullIPAddress": true,
 }
 
 var typeSerializerFuncs = map[string]string{
@@ -42,6 +51,15 @@ var typeSerializerFuncs = map[string]string{
 
 	// IP related
 	"IPAddress": "ipSerializer",
+
+	// unions
+	"UnionNullString":    "unionNullStringSerializer",
+	"UnionNullInt":       "unionNullIntSerializer",
+	"UnionNullLong":      "unionNullLongSerializer",
+	"UnionNullFloat":     "unionNullFloatSerializer",
+	"UnionNullDouble":    "unionNullDoubleSerializer",
+	"UnionNullBool":      "unionNullBoolSerializer",
+	"UnionNullIPAddress": "unionNullIPAddressSerializer",
 }
 
 var uuidSerializersFileContent = `
@@ -163,5 +181,60 @@ func float64SliceSerializer(vs []float64) string {
 		out += float64Serializer(v)
 	}
 	return out
+}
+
+// unions
+
+func unionNullStringSerializer(un UnionNullString) string {
+	if un.UnionType == UnionNullStringTypeEnumString {
+		return un.String
+	}
+	return ""
+}
+
+func unionNullIntSerializer(un UnionNullInt) string {
+	if un.UnionType == UnionNullIntTypeEnumInt {
+		return fmt.Sprintf("%d", un.Int)
+	}
+	return ""
+}
+
+func unionNullLongSerializer(un UnionNullLong) string {
+	if un.UnionType == UnionNullLongTypeEnumLong {
+		return fmt.Sprintf("%d", un.Long)
+	}
+	return ""
+}
+
+func unionNullFloatSerializer(un UnionNullFloat) string {
+	if un.UnionType == UnionNullFloatTypeEnumFloat {
+		return fmt.Sprintf("%.4f", un.Float)
+	}
+	return ""
+}
+
+func unionNullDoubleSerializer(un UnionNullDouble) string {
+	if un.UnionType == UnionNullDoubleTypeEnumDouble {
+		return fmt.Sprintf("%.4f", un.Double)
+	}
+	return ""
+}
+
+func unionNullBoolSerializer(un UnionNullBool) string {
+	if un.UnionType == UnionNullBoolTypeEnumBool {
+		return fmt.Sprintf("%v", un.Bool)
+	}
+	return ""
+}
+
+func unionNullIPAddressSerializer(un UnionNullIPAddress) string {
+	if un.UnionType == UnionNullIPAddressTypeEnumIPAddress {
+		out := ""
+		for _, v := range un.IPAddress {
+			out += fmt.Sprintf("%d", v)
+		}
+		return out
+	}
+	return ""
 }
 `
