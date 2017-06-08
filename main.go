@@ -47,8 +47,6 @@ func main() {
 		os.Exit(4)
 	}
 
-	types.AddUUIDSerializerToPackage(pkg)
-
 	// Add header comment to all generated files.
 	for _, f := range pkg.Files() {
 		pkg.AddHeader(f, codegenComment(files))

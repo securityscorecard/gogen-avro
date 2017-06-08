@@ -212,15 +212,20 @@ func (r *RecordDefinition) AddGenerateID(p *generator.Package) {
 		p.AddImport(r.filename(), "fmt")
 		p.AddImport(r.filename(), "github.com/satori/go.uuid")
 
+		uuidStrDef, requiredSerializers := r.uuidStrDef()
+
 		// Create function definition
 		fnDef := fmt.Sprintf(`
 			func (r %v) GenerateID() string {
 				s := fmt.Sprintf(%s)
 				return uuid.NewV5(uuid.NamespaceOID, s).String()
 			}
-		`, r.GoType(), r.uuidStrDef())
+		`, r.GoType(), uuidStrDef)
 
 		p.AddFunction(r.filename(), r.GoType(), "GenerateID", fnDef)
+
+		// Add serializers to the output package as required
+		AddUUIDSerializerToPackage(p, requiredSerializers)
 	}
 }
 
@@ -236,8 +241,6 @@ func extractAvailableFields(f Field) map[string]string {
 	// union case
 	un, ok := f.(*unionField)
 	if ok {
-		fmt.Println(f.GoType())
-
 		// Only allow a union of two types where the first type is nil
 		if len(un.itemType) != 2 {
 			panic("unions are only allowed to contain two types")
@@ -280,7 +283,8 @@ func extractAvailableFields(f Field) map[string]string {
 
 // uuidStrDef generates the fmt.Sprintf compatible input for the AddGenerateID method
 // e.g. for uuidKeys = []string{"A", "B"} => `"%v%v", A, B`
-func (r *RecordDefinition) uuidStrDef() string {
+// It also returns a list of required uuid serializers
+func (r *RecordDefinition) uuidStrDef() (string, []string) {
 	type Schema struct {
 		UUIDKeys []string `json:"uuid_keys"`
 	}
@@ -288,7 +292,7 @@ func (r *RecordDefinition) uuidStrDef() string {
 	var schema Schema
 	if err := mapstruct.Decode(r.metadata, &schema); err != nil {
 		fmt.Printf("failed to decode metadata: %s\n", err)
-		return ""
+		return "", nil
 	}
 
 	// Extract fields from the schema which can be used for uuid generation
@@ -327,6 +331,16 @@ func (r *RecordDefinition) uuidStrDef() string {
 		fieldsToInclude = append(fieldsToInclude, uuidField{Name: fName, Type: availableFields[fName]})
 	}
 
+	// track the serializers that we need
+	requiredSerializers := map[string]bool{}
+	for _, fti := range fieldsToInclude {
+		requiredSerializers[fti.Type] = true
+	}
+	requiredSerializersList := []string{}
+	for k := range requiredSerializers {
+		requiredSerializersList = append(requiredSerializersList, k)
+	}
+
 	strDef := `"`
 	for i := 0; i < len(fieldsToInclude); i++ {
 		strDef += "%s"
@@ -342,7 +356,7 @@ func (r *RecordDefinition) uuidStrDef() string {
 		strDef += fmt.Sprintf(", %s(r.%s)", serializerFn, fti.Name)
 	}
 
-	return strDef
+	return strDef, requiredSerializersList
 }
 
 // AddSendStats add a SendStats method which submits stats for this record
