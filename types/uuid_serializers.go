@@ -2,6 +2,8 @@ package types
 
 import "github.com/alanctgardner/gogen-avro/generator"
 
+// AddUUIDSerializerToPackage will add a file with Serializer functions
+// to the generated package code
 func AddUUIDSerializerToPackage(pkg *generator.Package) {
 	pkg.AddFile("uuid_serializers.go", uuidSerializersFileContent)
 }
@@ -31,12 +33,12 @@ var typeSerializerFuncs = map[string]string{
 
 	// int
 	"int": "intSerializer", "[]int": "intSliceSerializer",
-	"int32": "intSerializer", "[]int32": "intSliceSerializer",
-	"int64": "intSerializer", "[]int64": "intSliceSerializer",
+	"int32": "int32Serializer", "[]int32": "int32SliceSerializer",
+	"int64": "int64Serializer", "[]int64": "int64SliceSerializer",
 
 	// float
-	"float32": "floatSerializer", "[]float32": "floatSliceSerializer",
-	"float64": "floatSerializer", "[]float64": "floatSliceSerializer",
+	"float32": "float32Serializer", "[]float32": "float32SliceSerializer",
+	"float64": "float64Serializer", "[]float64": "float64SliceSerializer",
 
 	// IP related
 	"IPAddress": "ipSerializer",
@@ -48,111 +50,118 @@ import (
 	"reflect"
 )
 
-type fieldTypeSerializer func(interface{}) string
-
-var ipSerializer = fieldTypeSerializer(func(i interface{}) string {
+func ipSerializer(i interface{}) string {
 	vs := reflect.ValueOf(i).Convert(reflect.TypeOf([16]byte{})).Interface().([16]byte)
 	out := ""
 	for _, v := range vs {
 		out += fmt.Sprintf("%d", v)
 	}
 	return out
-})
+}
 
-var byteSerializer = fieldTypeSerializer(func(i interface{}) string {
-	v := i.(byte)
+// byte
+
+func byteSerializer(v byte) string {
 	return fmt.Sprintf("%d", v)
-})
+}
 
-var byteSliceSerializer = fieldTypeSerializer(func(i interface{}) string {
-	vs := i.([]byte)
+func byteSliceSerializer(vs []byte) string {
 	out := ""
 	for _, v := range vs {
-		out += fmt.Sprintf("%d", v)
+		out += byteSerializer(v)
 	}
 	return out
-})
+}
 
-var stringSerializer = fieldTypeSerializer(func(i interface{}) string {
-	v := i.(string)
+// string
+
+func stringSerializer(v string) string {
 	return v
-})
+}
 
-var stringSliceSerializer = fieldTypeSerializer(func(i interface{}) string {
-	vs := i.([]string)
+func stringSliceSerializer(vs []string) string {
 	out := ""
 	for _, v := range vs {
 		out += v
 	}
 	return out
-})
+}
 
-var boolSerializer = fieldTypeSerializer(func(i interface{}) string {
-	return fmt.Sprintf("%v", i)
-})
+// bool
 
-var boolSliceSerializer = fieldTypeSerializer(func(i interface{}) string {
-	vs := i.([]bool)
+func boolSerializer(v bool) string {
+	return fmt.Sprintf("%v", v)
+}
+
+func boolSliceSerializer(vs []bool) string {
 	out := ""
 	for _, v := range vs {
-		out += fmt.Sprintf("%v", v)
+		out += boolSerializer(v)
 	}
 	return out
-})
+}
 
-var intSerializer = fieldTypeSerializer(func(i interface{}) string {
-	return fmt.Sprintf("%d", i)
-})
+// int, int32, int64
 
-var intSliceSerializer = fieldTypeSerializer(func(i interface{}) string {
-	vsint, ok := i.([]int)
-	if ok {
-		out := ""
-		for _, v := range vsint {
-			out += fmt.Sprintf("%d", v)
-		}
-		return out
-	}
-	vsint32, ok := i.([]int32)
-	if ok {
-		out := ""
-		for _, v := range vsint32 {
-			out += fmt.Sprintf("%d", v)
-		}
-		return out
-	}
-	vsint64, ok := i.([]int64)
-	if ok {
-		out := ""
-		for _, v := range vsint64 {
-			out += fmt.Sprintf("%d", v)
-		}
-		return out
-	}
-	panic("invalid type: expected int, int32 or int64")
-})
+func intSerializer(v int) string {
+	return fmt.Sprintf("%d", v)
+}
 
-var floatSerializer = fieldTypeSerializer(func(i interface{}) string {
-	return fmt.Sprintf("%.4f", i)
-})
+func int32Serializer(v int32) string {
+	return fmt.Sprintf("%d", v)
+}
 
-var floatSliceSerializer = fieldTypeSerializer(func(i interface{}) string {
-	vsf32, ok := i.([]float32)
-	if ok {
-		out := ""
-		for _, v := range vsf32 {
-			out += fmt.Sprintf("%.4f", v)
-		}
-		return out
+func int64Serializer(v int64) string {
+	return fmt.Sprintf("%d", v)
+}
+
+func intSliceSerializer(vs []int) string {
+	out := ""
+	for _, v := range vs {
+		out += intSerializer(v)
 	}
-	vsf64, ok := i.([]float64)
-	if ok {
-		out := ""
-		for _, v := range vsf64 {
-			out += fmt.Sprintf("%.4f", v)
-		}
-		return out
+	return out
+}
+
+func int32SliceSerializer(vs []int32) string {
+	out := ""
+	for _, v := range vs {
+		out += int32Serializer(v)
 	}
-	panic("invalid type: expected float32 or float64")
-})
+	return out
+}
+
+func int64SliceSerializer(vs []int64) string {
+	out := ""
+	for _, v := range vs {
+		out += int64Serializer(v)
+	}
+	return out
+}
+
+// float32, float64
+
+func float32Serializer(v float32) string {
+	return fmt.Sprintf("%.4f", v)
+}
+
+func float64Serializer(v float64) string {
+	return fmt.Sprintf("%.4f", v)
+}
+
+func float32SliceSerializer(vs []float32) string {
+	out := ""
+	for _, v := range vs {
+		out += float32Serializer(v)
+	}
+	return out
+}
+
+func float64SliceSerializer(vs []float64) string {
+	out := ""
+	for _, v := range vs {
+		out += float64Serializer(v)
+	}
+	return out
+}
 `
