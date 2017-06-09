@@ -9,6 +9,11 @@ import (
 // AddUUIDSerializerToPackage will add a file with Serializer functions
 // to the generated package code
 func AddUUIDSerializerToPackage(pkg *generator.Package, requiredSerializers []string) {
+	// Don't create the file if no uuid serializers are required
+	if len(requiredSerializers) == 0 {
+		return
+	}
+
 	fileContent := uuidSerializersFileContent
 
 	for _, reqSer := range requiredSerializers {

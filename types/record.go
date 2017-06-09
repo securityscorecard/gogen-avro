@@ -241,14 +241,6 @@ func extractAvailableFields(f Field) map[string]string {
 	// union case
 	un, ok := f.(*unionField)
 	if ok {
-		// Only allow a union of two types where the first type is nil
-		if len(un.itemType) != 2 {
-			panic("unions are only allowed to contain two types")
-		}
-		if _, ok := un.itemType[0].(*nullField); !ok {
-			panic("unions must have null as their first type")
-		}
-
 		// The second type must be an allowed type
 		typ := un.itemType[1].GoType()
 		if _, ok := allowedFieldTypes[typ]; ok {
