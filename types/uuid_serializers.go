@@ -115,7 +115,10 @@ var byteSerializer = `
 var byteSliceSerializer = `
 	func byteSliceSerializer(vs []byte) string {
 		out := ""
-		for _, v := range vs {
+		for i, v := range vs {
+			if i != 0 {
+				out += "|"
+			}
 			out += fmt.Sprintf("%d", v)
 		}
 		return out
@@ -133,7 +136,10 @@ var stringSerializer = `
 var stringSliceSerializer = `
 	func stringSliceSerializer(vs []string) string {
 		out := ""
-		for _, v := range vs {
+		for i, v := range vs {
+			if i != 0 {
+				out += "|"
+			}
 			out += v
 		}
 		return out
@@ -151,7 +157,10 @@ var boolSerializer = `
 var boolSliceSerializer = `
 	func boolSliceSerializer(vs []bool) string {
 		out := ""
-		for _, v := range vs {
+		for i, v := range vs {
+			if i != 0 {
+				out += "|"
+			}
 			out += fmt.Sprintf("%v", v)
 		}
 		return out
@@ -181,7 +190,10 @@ var int64Serializer = `
 var intSliceSerializer = `
 	func intSliceSerializer(vs []int) string {
 		out := ""
-		for _, v := range vs {
+		for i, v := range vs {
+			if i != 0 {
+				out += "|"
+			}
 			out += fmt.Sprintf("%d", v)
 		}
 		return out
@@ -191,7 +203,10 @@ var intSliceSerializer = `
 var int32SliceSerializer = `
 	func int32SliceSerializer(vs []int32) string {
 		out := ""
-		for _, v := range vs {
+		for i, v := range vs {
+			if i != 0 {
+				out += "|"
+			}
 			out += fmt.Sprintf("%d", v)
 		}
 		return out
@@ -201,7 +216,10 @@ var int32SliceSerializer = `
 var int64SliceSerializer = `
 	func int64SliceSerializer(vs []int64) string {
 		out := ""
-		for _, v := range vs {
+		for i, v := range vs {
+			if i != 0 {
+				out += "|"
+			}
 			out += fmt.Sprintf("%d", v)
 		}
 		return out
@@ -225,7 +243,10 @@ var float64Serializer = `
 var float32SliceSerializer = `
 	func float32SliceSerializer(vs []float32) string {
 		out := ""
-		for _, v := range vs {
+		for i, v := range vs {
+			if i != 0 {
+				out += "|"
+			}
 			out += fmt.Sprintf("%.4f", v)
 		}
 		return out
@@ -235,7 +256,10 @@ var float32SliceSerializer = `
 var float64SliceSerializer = `
 	func float64SliceSerializer(vs []float64) string {
 		out := ""
-		for _, v := range vs {
+		for i, v := range vs {
+			if i != 0 {
+				out += "|"
+			}
 			out += fmt.Sprintf("%.4f", v)
 		}
 		return out
@@ -247,7 +271,10 @@ var float64SliceSerializer = `
 var ipSerializer = `
 	func ipSerializer(vs IPAddress) string {
 		out := ""
-		for _, v := range vs {
+		for i, v := range vs {
+			if i != 0 {
+				out += "|"
+			}
 			out += fmt.Sprintf("%d", v)
 		}
 		return out
@@ -314,7 +341,10 @@ var unionNullIPAddressSerializer = `
 	func unionNullIPAddressSerializer(un UnionNullIPAddress) string {
 		if un.UnionType == UnionNullIPAddressTypeEnumIPAddress {
 			out := ""
-			for _, v := range un.IPAddress {
+			for i, v := range un.IPAddress {
+				if i != 0 {
+					out += "|"
+				}
 				out += fmt.Sprintf("%d", v)
 			}
 			return out
