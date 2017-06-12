@@ -78,7 +78,7 @@ func TestStringSerializer(t *testing.T) {
 	}
 
 	// list
-	if s := stringSliceSerializer([]string{"hello", "bye"}); s != "hello|bye" {
+	if s := stringSliceSerializer([]string{"hello", "bye"}); s != "hello,bye" {
 		t.Fatalf("string slice serializer provided wrong result")
 	}
 
@@ -105,7 +105,7 @@ func TestInt32Serializer(t *testing.T) {
 	}
 
 	// list
-	if s := int32SliceSerializer([]int32{1, -1}); s != "1|-1" {
+	if s := int32SliceSerializer([]int32{1, -1}); s != "1,-1" {
 		t.Fatalf("int32 slice serializer provided wrong result")
 	}
 
@@ -132,7 +132,7 @@ func TestInt64Serializer(t *testing.T) {
 	}
 
 	// list
-	if s := int64SliceSerializer([]int64{1, -1}); s != "1|-1" {
+	if s := int64SliceSerializer([]int64{1, -1}); s != "1,-1" {
 		t.Fatalf("int64 slice serializer provided wrong result")
 	}
 
@@ -159,7 +159,7 @@ func TestFloat32Serializer(t *testing.T) {
 	}
 
 	// list
-	if s := float32SliceSerializer([]float32{1, -1}); s != "1.0000|-1.0000" {
+	if s := float32SliceSerializer([]float32{1, -1}); s != "1.0000,-1.0000" {
 		t.Fatalf("float32 slice serializer provided wrong result")
 	}
 
@@ -186,7 +186,7 @@ func TestFloat64Serializer(t *testing.T) {
 	}
 
 	// list
-	if s := float64SliceSerializer([]float64{1, -1}); s != "1.0000|-1.0000" {
+	if s := float64SliceSerializer([]float64{1, -1}); s != "1.0000,-1.0000" {
 		t.Fatalf("float64 slice serializer provided wrong result")
 	}
 
@@ -213,7 +213,7 @@ func TestBooleanSerializer(t *testing.T) {
 	}
 
 	// list
-	if s := boolSliceSerializer([]bool{true, false}); s != "true|false" {
+	if s := boolSliceSerializer([]bool{true, false}); s != "true,false" {
 		t.Fatalf("bool slice serializer provided wrong result")
 	}
 
@@ -232,10 +232,10 @@ func TestBooleanSerializer(t *testing.T) {
 }
 
 func TestIPSerializer(t *testing.T) {
-	if s := ipSerializer(IPAddressZero); s != "0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0" {
+	if s := ipSerializer(IPAddressZero); s != "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" {
 		t.Fatalf("ip serialize provided wrong result")
 	}
-	if s := ipSerializer(IPAddressV4Full); s != "0|0|0|0|0|0|0|0|0|0|255|255|255|255|255|255" {
+	if s := ipSerializer(IPAddressV4Full); s != "0,0,0,0,0,0,0,0,0,0,255,255,255,255,255,255" {
 		t.Fatalf("ip serialize provided wrong result")
 	}
 }

@@ -336,7 +336,7 @@ func (r *RecordDefinition) uuidStrDef() (string, []string) {
 	strDef := `"`
 	for i := 0; i < len(fieldsToInclude); i++ {
 		if i != 0 {
-			strDef += ","
+			strDef += "|"
 		}
 		strDef += "%s"
 	}
