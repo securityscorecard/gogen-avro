@@ -209,7 +209,6 @@ func (r *RecordDefinition) Schema(names map[QualifiedName]interface{}) interface
 func (r *RecordDefinition) AddGenerateID(p *generator.Package) {
 	// Import guard, to avoid circular dependencies
 	if !p.HasFunction(r.filename(), "", "GenerateID") {
-		p.AddImport(r.filename(), "fmt")
 		p.AddImport(r.filename(), "github.com/satori/go.uuid")
 
 		uuidStrDef, requiredSerializers := r.uuidStrDef()
@@ -217,7 +216,7 @@ func (r *RecordDefinition) AddGenerateID(p *generator.Package) {
 		// Create function definition
 		fnDef := fmt.Sprintf(`
 			func (r %v) GenerateID() string {
-				s := fmt.Sprintf(%s)
+				s := %s
 				return uuid.NewV5(uuid.NamespaceOID, s).String()
 			}
 		`, r.GoType(), uuidStrDef)
@@ -333,14 +332,7 @@ func (r *RecordDefinition) uuidStrDef() (string, []string) {
 		requiredSerializersList = append(requiredSerializersList, k)
 	}
 
-	strDef := `"`
-	for i := 0; i < len(fieldsToInclude); i++ {
-		if i != 0 {
-			strDef += "|"
-		}
-		strDef += "%s"
-	}
-	strDef += `"`
+	serializedFields := []string{}
 	for _, fti := range fieldsToInclude {
 		serializerFn, ok := typeSerializerFuncs[fti.Type]
 		if !ok {
@@ -348,8 +340,9 @@ func (r *RecordDefinition) uuidStrDef() (string, []string) {
 			os.Exit(1)
 		}
 
-		strDef += fmt.Sprintf(", %s(r.%s)", serializerFn, fti.Name)
+		serializedFields = append(serializedFields, fmt.Sprintf("%s(r.%s)", serializerFn, fti.Name))
 	}
+	strDef := strings.Join(serializedFields, " + FieldSeparator + ")
 
 	return strDef, requiredSerializersList
 }
@@ -358,7 +351,12 @@ func (r *RecordDefinition) uuidStrDef() (string, []string) {
 func (r *RecordDefinition) AddSendStats(p *generator.Package) {
 	// Import guard, to avoid circular dependencies
 	if !p.HasFunction(r.filename(), "", "SendStats") {
-		p.AddImport(r.filename(), "fmt")
+		metricTagsStrDef := r.metricTagsDef()
+
+		// Only add "fmt" if necessary (only when there are tags)
+		if metricTagsStrDef != "" {
+			p.AddImport(r.filename(), "fmt")
+		}
 		p.AddImport(r.filename(), "github.com/securityscorecard/go-stats")
 
 		// Create function definition
@@ -368,7 +366,7 @@ func (r *RecordDefinition) AddSendStats(p *generator.Package) {
 					%s
 				})
 			}
-		`, r.GoType(), r.name, r.metricTagsDef())
+		`, r.GoType(), r.name, metricTagsStrDef)
 
 		p.AddFunction(r.filename(), r.GoType(), "SendStats", fnDef)
 	}

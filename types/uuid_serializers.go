@@ -122,7 +122,7 @@ var byteSliceSerializer = `
 		out := ""
 		for i, v := range vs {
 			if i != 0 {
-				out += ","
+				out += ArraySeparator
 			}
 			out += fmt.Sprintf("%d", v)
 		}
@@ -143,7 +143,7 @@ var stringSliceSerializer = `
 		out := ""
 		for i, v := range vs {
 			if i != 0 {
-				out += ","
+				out += ArraySeparator
 			}
 			out += v
 		}
@@ -164,7 +164,7 @@ var boolSliceSerializer = `
 		out := ""
 		for i, v := range vs {
 			if i != 0 {
-				out += ","
+				out += ArraySeparator
 			}
 			out += fmt.Sprintf("%v", v)
 		}
@@ -197,7 +197,7 @@ var intSliceSerializer = `
 		out := ""
 		for i, v := range vs {
 			if i != 0 {
-				out += ","
+				out += ArraySeparator
 			}
 			out += fmt.Sprintf("%d", v)
 		}
@@ -210,7 +210,7 @@ var int32SliceSerializer = `
 		out := ""
 		for i, v := range vs {
 			if i != 0 {
-				out += ","
+				out += ArraySeparator
 			}
 			out += fmt.Sprintf("%d", v)
 		}
@@ -223,7 +223,7 @@ var int64SliceSerializer = `
 		out := ""
 		for i, v := range vs {
 			if i != 0 {
-				out += ","
+				out += ArraySeparator
 			}
 			out += fmt.Sprintf("%d", v)
 		}
@@ -250,7 +250,7 @@ var float32SliceSerializer = `
 		out := ""
 		for i, v := range vs {
 			if i != 0 {
-				out += ","
+				out += ArraySeparator
 			}
 			out += fmt.Sprintf("%.4f", v)
 		}
@@ -263,7 +263,7 @@ var float64SliceSerializer = `
 		out := ""
 		for i, v := range vs {
 			if i != 0 {
-				out += ","
+				out += ArraySeparator
 			}
 			out += fmt.Sprintf("%.4f", v)
 		}
@@ -278,7 +278,7 @@ var ipSerializer = `
 		out := ""
 		for i, v := range vs {
 			if i != 0 {
-				out += ","
+				out += ArraySeparator
 			}
 			out += fmt.Sprintf("%d", v)
 		}
@@ -348,7 +348,7 @@ var unionNullIPAddressSerializer = `
 			out := ""
 			for i, v := range un.IPAddress {
 				if i != 0 {
-					out += ","
+					out += ArraySeparator
 				}
 				out += fmt.Sprintf("%d", v)
 			}
@@ -361,5 +361,10 @@ var unionNullIPAddressSerializer = `
 var uuidSerializersFileContent = `
 import (
 	"fmt"
+)
+
+const (
+	FieldSeparator = string(0x1E)
+	ArraySeparator = string(0x1F)
 )
 `
