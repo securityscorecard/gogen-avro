@@ -209,6 +209,7 @@ func (r *RecordDefinition) Schema(names map[QualifiedName]interface{}) interface
 func (r *RecordDefinition) AddGenerateID(p *generator.Package) {
 	// Import guard, to avoid circular dependencies
 	if !p.HasFunction(r.filename(), "", "GenerateID") {
+		p.AddImport(r.filename(), "fmt")
 		p.AddImport(r.filename(), "github.com/satori/go.uuid")
 
 		uuidStrDef, requiredSerializers := r.uuidStrDef()
@@ -216,7 +217,7 @@ func (r *RecordDefinition) AddGenerateID(p *generator.Package) {
 		// Create function definition
 		fnDef := fmt.Sprintf(`
 			func (r %v) GenerateID() string {
-				s := %s
+				s := fmt.Println(%s)
 				return uuid.NewV5(uuid.NamespaceOID, s).String()
 			}
 		`, r.GoType(), uuidStrDef)
