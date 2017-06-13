@@ -65,36 +65,6 @@
             "type": ["null", "long"]
         },
         {
-            "name": "float",
-            "type": "float"
-        },
-        {
-            "name": "float_array",
-            "type": {
-              "type": "array",
-              "items": "float"
-            }
-        },
-        {
-            "name": "nullable_float",
-            "type": ["null", "float"]
-        },
-        {
-            "name": "double",
-            "type": "double"
-        },
-        {
-            "name": "double_array",
-            "type": {
-              "type": "array",
-              "items": "double"
-            }
-        },
-        {
-            "name": "nullable_double",
-            "type": ["null", "double"]
-        },
-        {
             "name": "ip_address",
             "type": {
                 "type": "fixed",
@@ -121,21 +91,15 @@
         "boolean",
         "int",
         "long",
-        "float",
-        "double",
         "ip_address",
         "object.name",
         "string_array",
         "boolean_array",
         "int_array",
         "long_array",
-        "float_array",
-        "double_array",
         "nullable_string",
         "nullable_boolean",
         "nullable_int",
-        "nullable_long",
-        "nullable_float",
-        "nullable_double"
+        "nullable_long"
     ]
 }

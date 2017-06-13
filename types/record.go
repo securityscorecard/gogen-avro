@@ -217,7 +217,7 @@ func (r *RecordDefinition) AddGenerateID(p *generator.Package) {
 		// Create function definition
 		fnDef := fmt.Sprintf(`
 			func (r %v) GenerateID() string {
-				s := fmt.Println(%s)
+				s := fmt.Sprint(%s)
 				return uuid.NewV5(uuid.NamespaceOID, s).String()
 			}
 		`, r.GoType(), uuidStrDef)

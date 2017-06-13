@@ -38,10 +38,6 @@ var allowedFieldTypes = map[string]bool{
 	"int32": true, "[]int32": true,
 	"int64": true, "[]int64": true,
 
-	// float
-	"float32": true, "[]float32": true,
-	"float64": true, "[]float64": true,
-
 	// ip
 	"IPAddress": true,
 
@@ -49,8 +45,6 @@ var allowedFieldTypes = map[string]bool{
 	"UnionNullString":    true,
 	"UnionNullInt":       true,
 	"UnionNullLong":      true,
-	"UnionNullFloat":     true,
-	"UnionNullDouble":    true,
 	"UnionNullBool":      true,
 	"UnionNullIPAddress": true,
 }
@@ -65,10 +59,6 @@ var typeSerializerFuncs = map[string]string{
 	"int32": "int32Serializer", "[]int32": "int32SliceSerializer",
 	"int64": "int64Serializer", "[]int64": "int64SliceSerializer",
 
-	// float
-	"float32": "float32Serializer", "[]float32": "float32SliceSerializer",
-	"float64": "float64Serializer", "[]float64": "float64SliceSerializer",
-
 	// IP related
 	"IPAddress": "ipSerializer",
 
@@ -76,8 +66,6 @@ var typeSerializerFuncs = map[string]string{
 	"UnionNullString":    "unionNullStringSerializer",
 	"UnionNullInt":       "unionNullIntSerializer",
 	"UnionNullLong":      "unionNullLongSerializer",
-	"UnionNullFloat":     "unionNullFloatSerializer",
-	"UnionNullDouble":    "unionNullDoubleSerializer",
 	"UnionNullBool":      "unionNullBoolSerializer",
 	"UnionNullIPAddress": "unionNullIPAddressSerializer",
 }
@@ -92,10 +80,6 @@ var serializers = map[string]string{
 	"int32": int32Serializer, "[]int32": int32SliceSerializer,
 	"int64": int64Serializer, "[]int64": int64SliceSerializer,
 
-	// float
-	"float32": float32Serializer, "[]float32": float32SliceSerializer,
-	"float64": float64Serializer, "[]float64": float64SliceSerializer,
-
 	// IP related
 	"IPAddress": ipSerializer,
 
@@ -103,8 +87,6 @@ var serializers = map[string]string{
 	"UnionNullString":    unionNullStringSerializer,
 	"UnionNullInt":       unionNullIntSerializer,
 	"UnionNullLong":      unionNullLongSerializer,
-	"UnionNullFloat":     unionNullFloatSerializer,
-	"UnionNullDouble":    unionNullDoubleSerializer,
 	"UnionNullBool":      unionNullBoolSerializer,
 	"UnionNullIPAddress": unionNullIPAddressSerializer,
 }
@@ -231,46 +213,6 @@ var int64SliceSerializer = `
 	}
 `
 
-// float32, float64
-
-var float32Serializer = `
-	func float32Serializer(v float32) string {
-		return fmt.Sprintf("%.4f", v)
-	}
-`
-
-var float64Serializer = `
-	func float64Serializer(v float64) string {
-		return fmt.Sprintf("%.4f", v)
-	}
-`
-
-var float32SliceSerializer = `
-	func float32SliceSerializer(vs []float32) string {
-		out := ""
-		for i, v := range vs {
-			if i != 0 {
-				out += ArraySeparator
-			}
-			out += fmt.Sprintf("%.4f", v)
-		}
-		return out
-	}
-`
-
-var float64SliceSerializer = `
-	func float64SliceSerializer(vs []float64) string {
-		out := ""
-		for i, v := range vs {
-			if i != 0 {
-				out += ArraySeparator
-			}
-			out += fmt.Sprintf("%.4f", v)
-		}
-		return out
-	}
-`
-
 // ip
 
 var ipSerializer = `
@@ -310,24 +252,6 @@ var unionNullLongSerializer = `
 	func unionNullLongSerializer(un UnionNullLong) string {
 		if un.UnionType == UnionNullLongTypeEnumLong {
 			return fmt.Sprintf("%d", un.Long)
-		}
-		return ""
-	}
-`
-
-var unionNullFloatSerializer = `
-	func unionNullFloatSerializer(un UnionNullFloat) string {
-		if un.UnionType == UnionNullFloatTypeEnumFloat {
-			return fmt.Sprintf("%.4f", un.Float)
-		}
-		return ""
-	}
-`
-
-var unionNullDoubleSerializer = `
-	func unionNullDoubleSerializer(un UnionNullDouble) string {
-		if un.UnionType == UnionNullDoubleTypeEnumDouble {
-			return fmt.Sprintf("%.4f", un.Double)
 		}
 		return ""
 	}
