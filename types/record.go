@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -211,21 +212,71 @@ func (r *RecordDefinition) AddGenerateID(p *generator.Package) {
 		p.AddImport(r.filename(), "fmt")
 		p.AddImport(r.filename(), "github.com/satori/go.uuid")
 
+		uuidStrDef, requiredSerializers := r.uuidStrDef()
+
 		// Create function definition
 		fnDef := fmt.Sprintf(`
 			func (r %v) GenerateID() string {
-				s := fmt.Sprintf(%s)
+				s := fmt.Sprint(%s)
 				return uuid.NewV5(uuid.NamespaceOID, s).String()
 			}
-		`, r.GoType(), r.uuidStrDef())
+		`, r.GoType(), uuidStrDef)
 
 		p.AddFunction(r.filename(), r.GoType(), "GenerateID", fnDef)
+
+		// Add serializers to the output package as required
+		AddUUIDSerializerToPackage(p, requiredSerializers)
 	}
+}
+
+func extractAvailableFields(f Field) map[string]string {
+	availableFields := map[string]string{}
+
+	// primitive case
+	if _, ok := allowedFieldTypes[f.GoType()]; ok {
+		availableFields[f.GoName()] = f.GoType()
+		return availableFields
+	}
+
+	// union case
+	un, ok := f.(*unionField)
+	if ok {
+		// The second type must be an allowed type
+		typ := un.itemType[1].GoType()
+		if _, ok := allowedFieldTypes[typ]; ok {
+			availableFields[f.GoName()] = f.GoType()
+			return availableFields
+		}
+	}
+
+	// reference type
+	ref, ok := f.(*Reference)
+	if ok {
+		// fixed type
+		// pass
+
+		// record type
+		rec, ok := ref.def.(*RecordDefinition)
+		if ok {
+			for _, f := range rec.fields {
+				moreAvailableFields := extractAvailableFields(f)
+
+				// update availableFields with moreAvailableFields
+				for fn, ft := range moreAvailableFields {
+					fullFieldName := fmt.Sprintf("%s.%s", rec.FieldType(), fn)
+					availableFields[fullFieldName] = ft
+				}
+			}
+		}
+	}
+
+	return availableFields
 }
 
 // uuidStrDef generates the fmt.Sprintf compatible input for the AddGenerateID method
 // e.g. for uuidKeys = []string{"A", "B"} => `"%v%v", A, B`
-func (r *RecordDefinition) uuidStrDef() string {
+// It also returns a list of required uuid serializers
+func (r *RecordDefinition) uuidStrDef() (string, []string) {
 	type Schema struct {
 		UUIDKeys []string `json:"uuid_keys"`
 	}
@@ -233,31 +284,80 @@ func (r *RecordDefinition) uuidStrDef() string {
 	var schema Schema
 	if err := mapstruct.Decode(r.metadata, &schema); err != nil {
 		fmt.Printf("failed to decode metadata: %s\n", err)
-		return ""
+		return "", nil
 	}
 
-	fieldsToInclude := []string{}
+	// Extract fields from the schema which can be used for uuid generation
+	availableFields := map[string]string{}
+	for _, f := range r.fields {
+		moreAvailableFields := extractAvailableFields(f)
+		for fn, ft := range moreAvailableFields {
+			availableFields[fn] = ft
+		}
+	}
+
+	// uuidToFieldName is an auxiliary function to convert a uuid_key name to
+	// an appropriate Go CamelCased name.
+	uuidToFieldName := func(uuidKey string) string {
+		ps := []string{}
+		for _, p := range strings.Split(uuidKey, ".") {
+			ps = append(ps, snaker.SnakeToCamel(p))
+		}
+		return strings.Join(ps, ".")
+	}
+
+	type uuidField struct {
+		Name string
+		Type string
+	}
+
+	// decide on which keys are to be used for uuid generation
+	fieldsToInclude := []uuidField{}
 	for _, uuidKey := range schema.UUIDKeys {
-		fieldsToInclude = append(fieldsToInclude, snaker.SnakeToCamel(uuidKey))
+		fName := uuidToFieldName(uuidKey)
+		if _, ok := availableFields[fName]; !ok {
+			fmt.Printf("Error: can't use %s as a uuid key\n", uuidKey)
+			os.Exit(1)
+		}
+
+		fieldsToInclude = append(fieldsToInclude, uuidField{Name: fName, Type: availableFields[fName]})
 	}
 
-	strDef := `"`
-	for i := 0; i < len(fieldsToInclude); i++ {
-		strDef += "%v"
+	// track the serializers that we need
+	requiredSerializers := map[string]bool{}
+	for _, fti := range fieldsToInclude {
+		requiredSerializers[fti.Type] = true
 	}
-	strDef += `"`
-	for _, fName := range fieldsToInclude {
-		strDef += fmt.Sprintf(", r.%s", fName)
+	requiredSerializersList := []string{}
+	for k := range requiredSerializers {
+		requiredSerializersList = append(requiredSerializersList, k)
 	}
 
-	return strDef
+	serializedFields := []string{}
+	for _, fti := range fieldsToInclude {
+		serializerFn, ok := typeSerializerFuncs[fti.Type]
+		if !ok {
+			fmt.Printf("Error: no serializer available for %s for use as a uuid key\n", fti.Name)
+			os.Exit(1)
+		}
+
+		serializedFields = append(serializedFields, fmt.Sprintf("%s(r.%s)", serializerFn, fti.Name))
+	}
+	strDef := strings.Join(serializedFields, " + FieldSeparator + ")
+
+	return strDef, requiredSerializersList
 }
 
 // AddSendStats add a SendStats method which submits stats for this record
 func (r *RecordDefinition) AddSendStats(p *generator.Package) {
 	// Import guard, to avoid circular dependencies
 	if !p.HasFunction(r.filename(), "", "SendStats") {
-		p.AddImport(r.filename(), "fmt")
+		metricTagsStrDef := r.metricTagsDef()
+
+		// Only add "fmt" if necessary (only when there are tags)
+		if metricTagsStrDef != "" {
+			p.AddImport(r.filename(), "fmt")
+		}
 		p.AddImport(r.filename(), "github.com/securityscorecard/go-stats")
 
 		// Create function definition
@@ -267,7 +367,7 @@ func (r *RecordDefinition) AddSendStats(p *generator.Package) {
 					%s
 				})
 			}
-		`, r.GoType(), r.name, r.metricTagsDef())
+		`, r.GoType(), r.name, metricTagsStrDef)
 
 		p.AddFunction(r.filename(), r.GoType(), "SendStats", fnDef)
 	}

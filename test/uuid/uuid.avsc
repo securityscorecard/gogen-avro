@@ -1,0 +1,105 @@
+{
+    "type": "record",
+    "namespace": "com.securityscorecard.collections",
+    "name": "uuid",
+    "subject": "com.securityscorecard.collections.uuid",
+    "fields": [
+        {
+            "name": "string",
+            "type": "string"
+        },
+        {
+            "name": "string_array",
+            "type": {
+              "type": "array",
+              "items": "string"
+            }
+        },
+        {
+            "name": "nullable_string",
+            "type": ["null", "string"]
+        },
+        {
+            "name": "boolean",
+            "type": "boolean"
+        },
+        {
+            "name": "boolean_array",
+            "type": {
+              "type": "array",
+              "items": "boolean"
+            }
+        },
+        {
+            "name": "nullable_boolean",
+            "type": ["null", "boolean"]
+        },
+        {
+            "name": "int",
+            "type": "int"
+        },
+        {
+            "name": "int_array",
+            "type": {
+              "type": "array",
+              "items": "int"
+            }
+        },
+        {
+            "name": "nullable_int",
+            "type": ["null", "int"]
+        },
+        {
+            "name": "long",
+            "type": "long"
+        },
+        {
+            "name": "long_array",
+            "type": {
+              "type": "array",
+              "items": "long"
+            }
+        },
+        {
+            "name": "nullable_long",
+            "type": ["null", "long"]
+        },
+        {
+            "name": "ip_address",
+            "type": {
+                "type": "fixed",
+                "size": 16,
+                "name": "ip_address"
+            }
+        },
+        {
+            "name": "object",
+            "type": {
+                "name": "object",
+                "type": "record",
+                "fields": [
+                    {
+                        "name": "name",
+                        "type": "string"
+                    }
+                ]
+            }
+        }
+    ],
+    "uuid_keys": [
+        "string",
+        "boolean",
+        "int",
+        "long",
+        "ip_address",
+        "object.name",
+        "string_array",
+        "boolean_array",
+        "int_array",
+        "long_array",
+        "nullable_string",
+        "nullable_boolean",
+        "nullable_int",
+        "nullable_long"
+    ]
+}
