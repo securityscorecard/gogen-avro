@@ -8,4 +8,4 @@ RUN update-ca-certificates --fresh
 
 ADD $binary /app/
 
-ENTRYPOINT ["./$binary"]
+ENTRYPOINT ["./gogen-avro"]
