@@ -20,11 +20,27 @@ func main() {
 		os.Exit(1)
 	}
 	targetDir := flag.Arg(0)
-	files := flag.Args()[1:]
+	inputs := flag.Args()[1:]
 
 	var err error
 	pkg := generator.NewPackage(*packageName)
 	namespace := types.NewNamespace()
+
+	var files []string
+	for _, input := range inputs {
+		err := filepath.Walk(input, func(fpath string, info os.FileInfo, err error) error {
+			if !info.IsDir() {
+				files = append(files, fpath)
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to walk input directory %s for schema files: %s", input, err)
+			os.Exit(2)
+		}
+	}
 
 	for _, fileName := range files {
 		schema, err := ioutil.ReadFile(fileName)
