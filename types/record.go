@@ -182,7 +182,7 @@ func (r *RecordDefinition) ResolveReferences(n *Namespace) error {
 }
 
 func (r *RecordDefinition) Schema(names map[QualifiedName]interface{}) interface{} {
-	name := r.name.String()
+	name := r.name.Name
 	if _, ok := names[r.name]; ok {
 		return name
 	}
@@ -200,7 +200,7 @@ func (r *RecordDefinition) Schema(names map[QualifiedName]interface{}) interface
 	}
 	return mergeMaps(map[string]interface{}{
 		"type":   "record",
-		"name":   name,
+		"name":   name, // Name field should be unqualified (not including namespace)
 		"fields": fields,
 	}, r.metadata)
 }
