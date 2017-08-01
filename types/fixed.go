@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/alanctgardner/gogen-avro/generator"
+	uuid "github.com/satori/go.uuid"
 )
 
 const writeFixedMethod = `
@@ -88,7 +89,11 @@ func (s *FixedDefinition) ResolveReferences(n *Namespace) error {
 
 func (s *FixedDefinition) Schema(names map[QualifiedName]interface{}) interface{} {
 	name := s.name.String()
-	names[s.name] = 1
+
+	// Add a small hash suffix to the name to avoid name collisions
+	suffix := uuid.NewV4().String()[:4]
+	name += "_" + suffix
+
 	return mergeMaps(map[string]interface{}{
 		"type": "fixed",
 		"name": name,
