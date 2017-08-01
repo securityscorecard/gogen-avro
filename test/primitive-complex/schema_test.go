@@ -86,23 +86,3 @@ func TestRoundTrip(t *testing.T) {
 		assert.Equal(t, *datum, f)
 	}
 }
-
-func TestSchema(t *testing.T) {
-	expectedSchemaStr := []byte(`{"fields":[{"name":"IntField","type":{"type":"int","logicalType":"timestamp-millis"}},{"name":"LongField","type":{"type":"long"}},{"name":"FloatField","type":{"type":"float"}},{"name":"DoubleField","type":{"type":"double"}},{"name":"StringField","type":{"type":"string","logicalType":"uuid"}}],"name":"PrimitiveTestRecord","type":"record"}`)
-	var expectedSchema interface{}
-	if err := json.Unmarshal(expectedSchemaStr, &expectedSchema); err != nil {
-		t.Fatalf("failed to unmarshal expected schema: %s", err)
-	}
-
-	tmp := PrimitiveTestRecord{}
-	schemaStr := tmp.Schema()
-
-	var schema interface{}
-	if err := json.Unmarshal([]byte(schemaStr), &schema); err != nil {
-		t.Fatalf("failed to unmarshal schema: %s", err)
-	}
-
-	if !reflect.DeepEqual(schema, expectedSchema) {
-		t.Fatalf("expected schemas to match, but they dont. Expected %+v but got %+v", expectedSchema, schema)
-	}
-}
