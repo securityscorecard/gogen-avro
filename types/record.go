@@ -9,6 +9,7 @@ import (
 
 	"github.com/alanctgardner/gogen-avro/generator"
 	mapstruct "github.com/rikonor/go-mapstruct"
+	uuid "github.com/satori/go.uuid"
 	"github.com/serenize/snaker"
 )
 
@@ -183,10 +184,11 @@ func (r *RecordDefinition) ResolveReferences(n *Namespace) error {
 
 func (r *RecordDefinition) Schema(names map[QualifiedName]interface{}) interface{} {
 	name := r.name.Name
-	if _, ok := names[r.name]; ok {
-		return name
-	}
-	names[r.name] = 1
+
+	// Add a small hash suffix to the name to avoid name collisions
+	suffix := uuid.NewV4().String()[:4]
+	name += "_" + suffix
+
 	fields := make([]interface{}, 0, len(r.fields))
 	for _, f := range r.fields {
 		fieldDef := map[string]interface{}{
