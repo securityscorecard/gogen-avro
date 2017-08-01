@@ -14,7 +14,11 @@ func AddUUIDSerializerToPackage(pkg *generator.Package, requiredSerializers []st
 		return
 	}
 
-	fileContent := uuidSerializersFileContent
+	fName := "uuid_serializers.go"
+
+	pkg.AddImport(fName, "fmt")
+	pkg.AddConstant(fName, "FieldSeparator", string(0x1E))
+	pkg.AddConstant(fName, "ArraySeparator", string(0x1F))
 
 	for _, reqSer := range requiredSerializers {
 		ser, ok := serializers[reqSer]
@@ -22,10 +26,8 @@ func AddUUIDSerializerToPackage(pkg *generator.Package, requiredSerializers []st
 			panic(fmt.Sprintf("uuid serializer for %s not found", reqSer))
 		}
 
-		fileContent += fmt.Sprintf("\n%s\n", ser)
+		pkg.AddFunction(fName, "", reqSer, ser)
 	}
-
-	pkg.AddFile("uuid_serializers.go", fileContent)
 }
 
 var allowedFieldTypes = map[string]bool{
@@ -280,15 +282,4 @@ var unionNullIPAddressSerializer = `
 		}
 		return ""
 	}
-`
-
-var uuidSerializersFileContent = `
-import (
-	"fmt"
-)
-
-const (
-	FieldSeparator = string(0x1E)
-	ArraySeparator = string(0x1F)
-)
 `
