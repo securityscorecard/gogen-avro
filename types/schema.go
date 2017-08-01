@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 const UTIL_FILE = "primitive.go"
@@ -595,4 +597,9 @@ func parseAliases(objectMap map[string]interface{}, namespace string) ([]Qualifi
 		qualifiedAliases = append(qualifiedAliases, ParseAvroName(namespace, aliasString))
 	}
 	return qualifiedAliases, nil
+}
+
+// hash is just a little utility function to generate a 4-char hash
+func hash() string {
+	return uuid.NewV4().String()[:4]
 }
