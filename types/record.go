@@ -183,10 +183,10 @@ func (r *RecordDefinition) ResolveReferences(n *Namespace) error {
 
 func (r *RecordDefinition) Schema(names map[QualifiedName]interface{}) interface{} {
 	name := r.name.Name
-	if _, ok := names[r.name]; ok {
-		return name
-	}
-	names[r.name] = 1
+
+	// Add a small hash suffix to the name to avoid name collisions
+	name += "_" + hash()
+
 	fields := make([]interface{}, 0, len(r.fields))
 	for _, f := range r.fields {
 		fieldDef := map[string]interface{}{

@@ -1,0 +1,12 @@
+{
+    "type": "record",
+    "namespace": "com.securityscorecard.collections",
+    "name": "rec_a",
+    "subject": "com.securityscorecard.collections.rec_a",
+    "fields": [
+        {
+            "name": "string",
+            "type": "string"
+        }
+    ]
+}

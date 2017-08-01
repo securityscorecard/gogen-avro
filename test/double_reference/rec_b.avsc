@@ -1,0 +1,16 @@
+{
+    "type": "record",
+    "namespace": "com.securityscorecard.collections",
+    "name": "rec_b",
+    "subject": "com.securityscorecard.collections.rec_b",
+    "fields": [
+        {
+            "name": "rec_a_1",
+            "type": "com.securityscorecard.collections.rec_a"
+        },
+        {
+            "name": "rec_a_2",
+            "type": "com.securityscorecard.collections.rec_a"
+        }
+    ]
+}
