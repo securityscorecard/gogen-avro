@@ -1,0 +1,15 @@
+{
+    "type": "record",
+    "namespace": "com.securityscorecard.collections",
+    "name": "uuid_mini",
+    "subject": "com.securityscorecard.collections.uuid_mini",
+    "fields": [
+        {
+            "name": "string",
+            "type": "string"
+        }
+    ],
+    "uuid_keys": [
+        "string"
+    ]
+}
