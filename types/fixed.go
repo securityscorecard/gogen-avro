@@ -89,8 +89,14 @@ func (s *FixedDefinition) ResolveReferences(n *Namespace) error {
 func (s *FixedDefinition) Schema(names map[QualifiedName]interface{}) interface{} {
 	name := s.name.String()
 
-	// Add a small hash suffix to the name to avoid name collisions
-	name += "_" + hash()
+	// If name already seen
+	if _, ok := names[s.name]; ok {
+		// Add a small hash suffix to the name to avoid name collisions
+		name += "_" + hash()
+	}
+
+	// mark name as seen
+	names[s.name] = 1
 
 	return mergeMaps(map[string]interface{}{
 		"type": "fixed",
