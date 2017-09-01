@@ -185,9 +185,15 @@ func (r *RecordDefinition) Schema(names map[QualifiedName]interface{}) interface
 	name := r.name.Name
 
 	// If name already seen
-	if _, ok := names[r.name]; ok {
-		// Add a small hgash suffix to the name to avoid name collisions
-		name += "_" + hash()
+	if v, ok := names[r.name]; ok {
+		// v is times name was seen
+		ts := v.(int)
+
+		// Add a suffix to the name to avoid name collisions
+		name += "_" + fmt.Sprintf("%d", ts)
+
+		// Update the times seen count
+		names[r.name] = ts + 1
 	}
 
 	// mark name as seen
