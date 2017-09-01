@@ -65,7 +65,7 @@ func main() {
 
 	// Add header comment to all generated files.
 	for _, f := range pkg.Files() {
-		pkg.AddHeader(f, codegenComment(files))
+		pkg.AddHeader(f, codegenCommentMinimal())
 	}
 
 	err = pkg.WriteFiles(targetDir)
@@ -113,4 +113,11 @@ func codegenComment(sources []string) string {
 	}
 
 	return fmt.Sprintf(fileComment, strings.Join(sourceBlock, "\n"))
+}
+
+func codegenCommentMinimal() string {
+	return `/*
+ * CODE GENERATED AUTOMATICALLY WITH github.com/alanctgardner/gogen-avro
+ * THIS FILE SHOULD NOT BE EDITED BY HAND
+ */`
 }
