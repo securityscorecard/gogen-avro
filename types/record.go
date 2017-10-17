@@ -328,12 +328,13 @@ func (r *RecordDefinition) uuidStrDef() (string, []string) {
 	for _, uuidKey := range schema.UUIDKeys {
 		fName := uuidToFieldName(uuidKey)
 		if _, ok := availableFields[fName]; !ok {
-			fmt.Printf("Error: can't use %s as a uuid key\n", uuidKey)
-			keys := []string{}
-			for key := range availableFields {
-				keys = append(keys, strings.ToLower(key))
+			fmt.Printf("Error: can't use %s as a uuid key\n", fName)
+			fields := []string{}
+			for field := range availableFields {
+				fields = append(fields, field)
 			}
-			fmt.Printf("Error: valid UUID keys are %s\n", strings.Join(keys, ", "))
+			fmt.Printf("Error: valid UUID keys %s\n", strings.Join(fields, ", "))
+			fmt.Printf("Error: the keys above are shown in Go format (CamelCase), but must be declared in uuid_keys using the Avro format (snake_case).\n")
 			os.Exit(1)
 		}
 
