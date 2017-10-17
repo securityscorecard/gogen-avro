@@ -329,6 +329,11 @@ func (r *RecordDefinition) uuidStrDef() (string, []string) {
 		fName := uuidToFieldName(uuidKey)
 		if _, ok := availableFields[fName]; !ok {
 			fmt.Printf("Error: can't use %s as a uuid key\n", uuidKey)
+			keys := []string{}
+			for key := range availableFields {
+				keys = append(keys, strings.ToLower(key))
+			}
+			fmt.Printf("Error: valid UUID keys are %s\n", strings.Join(keys, ", "))
 			os.Exit(1)
 		}
 
