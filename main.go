@@ -68,6 +68,11 @@ func main() {
 		pkg.AddHeader(f, codegenCommentMinimal())
 	}
 
+	if err := os.MkdirAll(targetDir, os.ModeDir | 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating output directory %s: %s", targetDir, err)
+		os.Exit(4)
+	}
+
 	err = pkg.WriteFiles(targetDir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error writing source files to directory %q - %v\n", targetDir, err)
