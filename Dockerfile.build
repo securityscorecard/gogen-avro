@@ -1,7 +1,0 @@
-FROM registry.securityscorecard.io/go-builder:1.8.0
-
-WORKDIR /go/src/github.com/alanctgardner/gogen-avro
-ADD . /go/src/github.com/alanctgardner/gogen-avro
-
-ENTRYPOINT ["go"]
-CMD ["build", "-o", "/out/gogen-avro", "-v", "-a", "-tags", "netgo", "-ldflags=-s -w", "."]
