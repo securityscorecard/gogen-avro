@@ -1,11 +1,19 @@
-FROM registry.daymax.xyz/tm-go-deployer:latest
+# Stage 1 - Build binary
+FROM golang:1.9.1 AS builder
 
-ENV binary gogen-avro
+WORKDIR /go/src/github.com/alanctgardner/gogen-avro
+ADD . .
 
-WORKDIR /app
+ENV CGO_ENABLED=0
 
-RUN update-ca-certificates --fresh
+RUN go build -o /out/gogen-avro -v -a -tags netgo -ldflags="-s -w" .
 
-ADD $binary /app/
+# Stage 2 - Package binary
+FROM scratch
+
+WORKDIR /app/
+
+COPY --from=builder /out/gogen-avro .
+COPY --from=builder /etc/ssl/certs /etc/ssl/certs
 
 ENTRYPOINT ["./gogen-avro"]
