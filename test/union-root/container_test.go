@@ -3,7 +3,7 @@ package avro
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/alanctgardner/gogen-avro/container"
+	"github.com/securityscorecard/gogen-avro/container"
 	"github.com/linkedin/goavro"
 	"github.com/stretchr/testify/assert"
 	"testing"
