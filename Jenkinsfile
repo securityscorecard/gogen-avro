@@ -15,7 +15,7 @@ node {
                 cd \$GOPATH/src/github.com/securityscorecard/${repo} && \
                 ./test.sh
                 """
-            }}
+            }
         }),
         Vetting: closureGoVet()
     ])
