@@ -9,7 +9,11 @@ ENV CGO_ENABLED=0
 RUN go build -o /out/gogen-avro -v -a -tags netgo -ldflags="-s -w" .
 
 # Stage 2 - Package binary
-FROM scratch
+#
+# Note that we cannot use 'FROM scratch' here because this container needs to be
+# runnable in Jenkins, which requires 'cat' to exist for 'docker.inside()' to
+# work.
+FROM alpine:3.6
 
 WORKDIR /app/
 
