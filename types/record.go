@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/alanctgardner/gogen-avro/generator"
-	mapstruct "github.com/rikonor/go-mapstruct"
+	mapstruct "github.com/alanctgardner/gogen-avro/mapstruct"
 	"github.com/serenize/snaker"
 )
 

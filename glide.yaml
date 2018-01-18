@@ -1,7 +1,6 @@
 package: github.com/alanctgardner/gogen-avro
 import:
 - package: github.com/golang/snappy
-- package: github.com/rikonor/go-mapstruct
 - package: github.com/satori/go.uuid
   version: ^1.1.0
 - package: github.com/securityscorecard/go-stats
