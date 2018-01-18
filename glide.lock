@@ -1,38 +1,36 @@
-hash: e7cb5dcf3963572a081bdacb43edfb6d884095ce5bc51deacaa4cd41eaa1afc3
-updated: 2017-06-14T12:09:40.233226053-04:00
+hash: d720f56bdba86fc333587b514692d5285f039f4ca150698da9b2ae1cf44993d4
+updated: 2018-01-18T12:28:33.100147-05:00
 imports:
 - name: github.com/DataDog/datadog-go
-  version: 6fa3e39b86f8cbb638a971f2a90b9ebd98074c6b
+  version: 4d2e5696ebe914940bd7459d2266fb7d555ea1b7
   subpackages:
   - statsd
 - name: github.com/golang/snappy
-  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
+  version: 553a641470496b2327abcac10b36396bd98e45c9
 - name: github.com/influxdata/influxdb
-  version: 8b9c6b8a9846cc25d009ebb9cf48d0b4cca214f7
+  version: 9591ecf8061179f15fd87f513dbc57783adbc0ec
   subpackages:
   - client/v2
   - models
   - pkg/escape
-- name: github.com/rikonor/go-mapstruct
-  version: efef4abc9b3a5048dfff5b3a6f2c16699b8e43da
 - name: github.com/satori/go.uuid
-  version: 879c5887cd475cd7864858769793b2ceb0d44feb
+  version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
 - name: github.com/securityscorecard/go-stats
-  version: b5f02469e0d6baa99d3b42dcd8e50f7a046072c1
+  version: ad853b8c7e7bb1cd077ec69f76ce8a199965c36e
 - name: github.com/serenize/snaker
-  version: 1c7f65329f6524115af8ca01ab604c00cddf5558
+  version: a683aaf2d516deecd70cad0c72e3ca773ecfcef0
 testImports:
 - name: github.com/davecgh/go-spew
   version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
   - spew
 - name: github.com/linkedin/goavro
-  version: 35a711205a760f2f39d10850061ca535f6fe914b
+  version: 45b9a0062a837ab3214741a91bff89e2a2e4fae6
 - name: github.com/pmezard/go-difflib
-  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
+  version: b91bfb9ebec76498946beb6af7c0230c7cc7ba6c
   subpackages:
   - assert
