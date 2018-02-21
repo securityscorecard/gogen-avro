@@ -166,6 +166,15 @@ func (n *Namespace) decodeRecordDefinition(namespace string, schemaMap map[strin
 		decodedFields = append(decodedFields, fieldStruct)
 	}
 
+	// Version doesn't exist for every schema, frustratingly. So the zero
+	// value, which we never use as a version, will indicate its absence.
+	var version int
+	if untypedVersion, ok := schemaMap["version"]; ok {
+		if floatVersion, ok := untypedVersion.(float64); ok {
+			version = int(floatVersion)
+		}
+	}
+
 	aliases, err := parseAliases(schemaMap, namespace)
 	if err != nil {
 		return nil, err
@@ -173,6 +182,7 @@ func (n *Namespace) decodeRecordDefinition(namespace string, schemaMap map[strin
 
 	return &RecordDefinition{
 		name:     ParseAvroName(namespace, name),
+		version:  version,
 		aliases:  aliases,
 		fields:   decodedFields,
 		metadata: schemaMap,
