@@ -45,6 +45,7 @@ func %v(r io.Reader) (%v, error) {
 
 type RecordDefinition struct {
 	name     QualifiedName
+	version  int
 	aliases  []QualifiedName
 	fields   []Field
 	metadata map[string]interface{}
@@ -239,6 +240,24 @@ func (r *RecordDefinition) AddGenerateID(p *generator.Package) {
 		// Add serializers to the output package as required
 		AddUUIDSerializerToPackage(p, requiredSerializers)
 	}
+}
+
+// AddSchemaVersion adds a SchemaVersion method which returns the version of the
+// schema.
+func (r *RecordDefinition) AddSchemaVersion(p *generator.Package) {
+	// Import guard, to avoid circular dependencies
+	if p.HasFunction(r.filename(), "", "SchemaVersion") {
+		return
+	}
+
+	// Create function definition
+	fnDef := fmt.Sprintf(`
+		func (r %v) SchemaVersion() int {
+			return %d
+		}
+	`, r.GoType(), r.version)
+
+	p.AddFunction(r.filename(), r.GoType(), "SchemaVersion", fnDef)
 }
 
 func extractAvailableFields(f Field) map[string]string {

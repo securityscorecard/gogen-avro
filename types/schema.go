@@ -166,6 +166,11 @@ func (n *Namespace) decodeRecordDefinition(namespace string, schemaMap map[strin
 		decodedFields = append(decodedFields, fieldStruct)
 	}
 
+	version, ok := schemaMap["version"]
+	if !ok {
+		return nil, fmt.Errorf("No version found in schema.")
+	}
+
 	aliases, err := parseAliases(schemaMap, namespace)
 	if err != nil {
 		return nil, err
@@ -173,6 +178,7 @@ func (n *Namespace) decodeRecordDefinition(namespace string, schemaMap map[strin
 
 	return &RecordDefinition{
 		name:     ParseAvroName(namespace, name),
+		version:  version,
 		aliases:  aliases,
 		fields:   decodedFields,
 		metadata: schemaMap,
