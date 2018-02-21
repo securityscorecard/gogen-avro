@@ -141,8 +141,9 @@ func (r *RecordDefinition) AddStruct(p *generator.Package) {
 		}
 		p.AddFunction(r.filename(), r.GoType(), "Schema", r.schemaMethod())
 
-		// For Records we also want to add a GenerateID and SendStats methods
+		// For Records we also want to add other utility methods.
 		r.AddGenerateID(p)
+		r.AddSchemaVersion(p)
 		r.AddSendStats(p)
 	}
 }
