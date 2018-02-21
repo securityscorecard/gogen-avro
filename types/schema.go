@@ -166,9 +166,13 @@ func (n *Namespace) decodeRecordDefinition(namespace string, schemaMap map[strin
 		decodedFields = append(decodedFields, fieldStruct)
 	}
 
-	version, ok := schemaMap["version"]
-	if !ok {
-		return nil, fmt.Errorf("No version found in schema.")
+	// Version doesn't exist for every schema, frustratingly. So the zero
+	// value, which we never use as a version, will indicate its absence.
+	var version int
+	if untypedVersion, ok := schemaMap["version"]; ok {
+		if floatVersion, ok := untypedVersion.(float64); ok {
+			version = int(floatVersion)
+		}
 	}
 
 	aliases, err := parseAliases(schemaMap, namespace)
